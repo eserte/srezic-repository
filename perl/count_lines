@@ -1,0 +1,36 @@
+use Inline C => <<'EOF';
+
+#include <sys/param.h>
+#include <sys/stat.h>
+
+#include <ctype.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int count_lines(char *file) {
+	struct stat sb;
+	u_quad_t linect;
+	int fd, len;
+	u_char *p;
+	u_char buf[MAXBSIZE];
+
+	linect = 0;
+	if ((fd = open(file, O_RDONLY, 0)) < 0) {
+		croak("%s: open", file);
+	}
+	while ((len = read(fd, buf, MAXBSIZE))) {
+		if (len == -1) {
+			(void)close(fd);
+			croak("%s: read", file);
+		}
+		for (p = buf; len--; ++p)
+			if (*p == '\n')
+				++linect;
+	}
+	(void)close(fd);
+	return linect;
+}
+
+EOF

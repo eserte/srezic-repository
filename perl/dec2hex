@@ -1,0 +1,18 @@
+=head2 dec2hex($dec)
+
+=for category Math
+
+Similar to C<sprintf "%x", $dec>, but works also with bignums.
+
+=cut
+
+sub dec2hex {
+    my $uv = shift;
+    my @p = split //, "0123456789abcdef";
+    my $eptr = "";
+    do {
+	my $dig = $uv & 15;
+	$eptr = $p[$dig] . $eptr;
+    } while ($uv >>= 4);
+    $eptr;
+}

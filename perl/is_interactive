@@ -1,0 +1,24 @@
+=head2 is_interactive()
+
+=for category Term
+
+Return true, if the process has a terminal.
+
+=cut
+
+sub is_interactive {
+    if ($^O eq 'MSWin32' || !eval { require POSIX; 1 }) {
+	# fallback
+	return -t STDIN && -t STDOUT;
+    }
+
+    # from perlfaq8
+    open(TTY, "/dev/tty") or die $!;
+    my $tpgrp = POSIX::tcgetpgrp(fileno(*TTY));
+    my $pgrp = getpgrp();
+    if ($tpgrp == $pgrp) {
+	1;
+    } else {
+	0;
+    }
+}

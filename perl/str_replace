@@ -1,0 +1,11 @@
+sub str_replace (@@$) {
+    my($from, $to, $val) = @_;
+    die if @$from != @$to;
+    my %repl;
+    for my $i (0 .. $#$from) {
+	$repl{$from->[$i]} = $to->[$i];
+    }
+    my $in_rx = join "|", map { quotemeta } @$from;
+    $val =~ s/($in_rx)/$repl{$1}/ge;
+    $val;
+}

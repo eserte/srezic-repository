@@ -1,0 +1,20 @@
+=head2 get_name_servers
+
+=for category Net
+
+Return a list of name servers from /etc/resolv.conf.
+
+=cut
+
+sub get_name_servers {
+    my @nameservers;
+    open(F, "/etc/resolv.conf") or die "Can't open /etc/resolv.conf: $!";
+    while(<F>) {
+	chomp;
+	if (/nameserver\s+(.*)$/) {
+	    push @nameservers, $1;
+	}
+    }
+    close F;
+    @nameservers;
+}

@@ -1,0 +1,30 @@
+=head2 rcs_description(rcslog_filehandle)
+
+=for category VC
+
+Return the description of an RCS or CVS controlled file. Usage example:
+    open(L, "rlog filename|");
+    print rcs_description(\*L);
+or
+    open(L, "cvs log filename|");
+    print rcs_description(\*L);
+
+=cut
+
+sub rcs_description {
+    my $fh = shift;
+    my $in_description;
+    my $description = "";
+    while(<$fh>) {
+	if (/^description:$/) {
+	    $in_description++;
+	} elsif ($in_description) {
+	    if (/^----------------------------$/) {
+		last;
+	    }
+	    $description .= $_;
+	}
+    }
+    chomp $description;
+    $description;
+}

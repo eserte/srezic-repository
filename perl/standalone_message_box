@@ -1,0 +1,30 @@
+=head2 standalone_message_box
+
+=for category Tk
+
+A message box which can be invoked without Tk being loaded before. It
+uses the same arguments as messageBox from Tk, but is always invoked
+as a function. Return the messageBox answer.
+
+=cut
+
+sub standalone_message_box {
+    my %args = @_;
+    require Tk;
+    my $mw_created;
+    my(@mw) = Tk::MainWindow::Existing();
+    if (!@mw) {
+	push @mw, MainWindow->new();
+	$mw[0]->withdraw;
+	$mw_created++;
+    }
+    $args{-icon}  = 'error' unless exists $args{-icon};
+    $args{-title} = 'Error' unless exists $args{-error};
+    $args{-type}  = 'OK'    unless exists $args{-type};
+    my $answer = $mw[0]->messageBox(%args);
+    if ($mw_created) {
+	$mw[0]->destroy;
+    }
+    $answer;
+}
+

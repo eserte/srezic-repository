@@ -1,0 +1,32 @@
+=head2 utf2latin (STRING)
+
+=for category Conv
+
+Uebersetzt eine Zeichenkette von UTF-8 nach Latin-1 (aka
+ISO-8859-1). Zeichen die aus einem anderen Zeichensatz stammen, werden
+in ein entsprechendes Entity (&#nnnn;) umgewandelt. Zu Zeit werden nur
+Entities unterstuetzt, die sich in UTF-8 in drei Zeichen kodieren
+lassen.
+
+Gepostet von bayer@sdm.de (Ralf Bayer).
+
+=cut
+
+sub utf2latin {
+    my $string = shift;
+
+    $string =~
+	s/([\xe0-\xef])([\x80-\xbf])([\x80-\xbf])/
+          "&#" . (((ord($1) & 0x1f)*64+(ord($2) & 0x3f))*64+(ord($3) & 0x3f)) . ";"
+		/gex;
+    $string =~
+	s/([\xc4-\xdf])([\x80-\xbf])/
+          "&#" . ((ord($1) & 0x1f)*64+(ord($2) & 0x3f)) . ";"
+		/gex;
+    $string =~
+	s/([\xc0-\xc3])([\x80-\xbf])/
+          chr(((ord($1) & 0x03) << 6) | (ord($2) & 0x3f))
+		/gex;
+
+    return $string;
+}

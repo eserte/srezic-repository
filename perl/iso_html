@@ -1,0 +1,21 @@
+=head2 iso_html($s)
+
+=for category Conv
+
+Translate string from html encoding to iso-8859-1 cp850. Only
+german umlauts are handled.
+
+=cut
+
+sub iso_html {
+    $_[0] =~ s/ä/&auml;/g;
+    $_[0] =~ s/ö/&ouml;/g;
+    $_[0] =~ s/ü/&uuml;/g;
+    $_[0] =~ s/Ä/&Auml;/g;
+    $_[0] =~ s/Ö/&Ouml;/g;
+    $_[0] =~ s/Ü/&Uuml;/g;
+    $_[0] =~ s/ß/&szlig;/g;
+    $_[0] =~ s/<93>/&quot;/g;
+    $_[0] =~ s/\263/&quot;/g;
+    $_[0];
+}

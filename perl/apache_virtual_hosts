@@ -1,0 +1,118 @@
+=head2 apache_virtual_hosts([$sortby])
+
+=for category Net
+
+Get a list of virtual hosts for the current apache. Each element of
+the list is a hash reference with following keys:
+
+=over 4
+
+=item IP
+
+IP address of virtual host
+
+=item Name
+
+Domain name of virtual host
+
+=item ConfFile
+
+Path to configuration file
+
+=item ConfLine
+
+Line in configuration file
+
+=item ConfDate
+
+Last modification time
+
+=back
+
+With the optional parameter $sort_by you can change the sorting of the
+list. Use one of the above mentioned hash keys for the sorting.
+
+=cut
+
+sub apache_virtual_hosts {
+    my $sortby = shift;
+
+    my @vhosts;
+
+    my $last_name_virtual_host;
+    my %seen;
+
+    open(VH, "httpd -S 2>&1 |") or die $!;
+
+    my $get_conf = sub {
+	my $conf = shift;
+	my($conf_file, $conf_line, $conf_date);
+	if ($conf =~ /^\((.*):([^:]*)\)$/) {
+	    require POSIX;
+	    ($conf_file, $conf_line) = ($1, $2);
+	    my(@stat) = stat($conf_file);
+	    if (@stat) {
+		$conf_date = POSIX::strftime("%04Y-%02m-%02d", localtime $stat[9]);
+	    }
+	}
+	($conf_file, $conf_line, $conf_date);
+    };
+
+    while(<VH>) {
+        if (/fopen: Permission denied/ ||
+	    /httpd: could not open document config file/ ||
+	    /\s\[error\]\s/) {
+	    warn $_;
+	    next;
+	}
+	next if /^VirtualHost config/;
+	next if /^\[/;
+	chomp;
+
+	# virtual hosts
+	if (/^\s+/) {
+	    if (/port\s+(\d+)\s+namevhost\s+(\S+)\s+(\([^\)]+\))/) {
+		my $name = $2;
+		my $port = $1;
+		my $conf = $3;
+		next if $seen{$name};
+		my($conf_file, $conf_line, $conf_date) = $get_conf->($conf);
+		push @vhosts, {IP => $last_name_virtual_host,
+			       Name => $name,
+			       ConfFile => $conf_file,
+			       ConfLine => $conf_line,
+			       ConfDate => $conf_date,
+			      };
+		$seen{$name}++;
+	    }
+	    next;
+	}
+
+	my($ip, $rest) = split /\s+/, $_, 2;
+	if ($rest =~ /is a NameVirtualHost/i) {
+	    $last_name_virtual_host = $ip;
+	} else {
+	    # normal servers
+	    my($name, $conf) = split /\s+/, $rest;
+	    next if $seen{$name};
+	    my($conf_file, $conf_line, $conf_date) = $get_conf->($conf);
+	    push @vhosts, {IP => $ip,
+			   Name => $name,
+			   ConfFile => $conf_file,
+			   ConfLine => $conf_line,
+			   ConfDate => $conf_date,
+			  };
+	    $seen{$name}++;
+	}
+    }
+    close VH;
+
+    if (!defined $sortby) {
+	$sortby = "Name";
+    }
+    @vhosts = sort { $a->{$sortby} cmp $b->{$sortby} } @vhosts; # XXX use ST
+    if ($sortby eq 'ConfDate') { # hier rückwärts sortieren
+	@vhosts = reverse @vhosts;
+    }
+    @vhosts;
+}

@@ -1,0 +1,12 @@
+{
+    my $top = ((Tk::MainWindow::Existing())[0]);
+    $top->bind("<Pause>" => sub {
+		   eval {
+		       require Tk::WidgetDump;
+		       $top->WidgetDump;
+		   }; warn $@ if $@;
+		   require Config;
+		   my $perldir = $Config::Config{'scriptdir'};
+		   require "$perldir/ptksh";
+	       });
+}

@@ -1,0 +1,33 @@
+# These functions calculate the julian date from day/month/year and vice
+# versa. They were translated from a VMS command procedure in VMS CLI lingo
+# (called DCL), and provided to the Perl Function Repository by Martin
+# Vorlaender (martin@radiogaga.harz.de, mv@pdv-systeme.de).
+# The message accompanying the original code was:
+#
+# From: Pierre.Bru@spotimage.fr
+# Newsgroups: vmsnet.pdp-11,alt.sys.pdp11,comp.os.vms,comp.sys.dec
+# Subject: Re: Y2K Conversion of Date to Internal Format
+# Date: Thu, 20 Aug 1998 12:51:29 GMT
+#
+# here is a DCL version of the R.G. Tantzen algorithm ('ALGORITHM 199' of
+# the 'Association for Computing Machinery' (ACM)) that convert gregorian
+# date to julian day number and back. all is integer arithmetic and 32-bit
+# integers.
+#
+# this algorithm is year-2000-proof, leap-year-proof, century-leap-year-proof
+# and you can compute julian day with this algorithm back to the begining of
+# the gregorian calendar, october 15, 1582.
+#
+
+sub dmy_to_julian($$$) {
+	use integer;
+	my ($d,$m,$y) = @_;
+
+	if ($m > 2) { $m -= 3 } else { $m += 9; --$y }
+	return
+		($y / 100) * 146097 / 4 +
+		($y % 100) * 1461 / 4 +
+		($m * 153 + 2) / 5 +
+		$d +
+		1721119;
+}

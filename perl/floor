@@ -1,0 +1,11 @@
+=item floor
+
+The floor function, works also without POSIX.pm.
+
+=cut
+
+sub floor {
+    my $int = int($_[0]);
+    return $int   if ($_[0] == $int || $_[0] >= 0);
+    return $int-1;
+}

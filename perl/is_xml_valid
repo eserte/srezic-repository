@@ -1,0 +1,29 @@
+=head2 is_xml_valid(%args)
+
+=for category XML
+
+Return true if the specified file (with option -file) or string (with
+option -string) is a valid XML file. Requires XML::Parser.
+
+=cut
+
+sub is_xml_valid {
+    my(%args) = @_;
+    require XML::Parser;
+    my $p1 = XML::Parser->new;
+    my $r = 1;
+    eval {
+	if (exists $args{-string}) {
+	    $p1->parse($args{-string});
+	} elsif (exists $args{-file}) {
+	    $p1->parsefile($args{-file});
+	} else {
+	    die "Missing -file or -string";
+	}
+    };
+    if ($@) {
+	warn $@;
+	$r = 0;
+    }
+    $r;
+}

@@ -1,0 +1,30 @@
+=head2 copy_stat($src, $dest)
+
+=for category File
+
+Copy stat information (owner, group, mode and time) from one file to
+another. If $src is an array reference, then this is used as the
+source stat information.
+
+=cut
+
+sub copy_stat {
+    my($src, $dest) = @_;
+    my @stat = ref $src eq 'ARRAY' ? @$src : stat($src);
+    die "Can't stat $src: $!" if !@stat;
+
+    chmod $stat[2], $dest
+	or warn "Can't chmod $dest to " . sprintf("0%o", $stat[2]) . ": $!";
+    chown $stat[4], $stat[5], $dest
+	or do {
+	    my $save_err = $!; # otherwise it's lost in the get... calls
+	    warn "Can't chown $dest to " .
+		 (getpwuid($stat[4]))[0] . "/" .
+                 (getgrgid($stat[5]))[0] . ": $save_err";
+	};
+    utime $stat[8], $stat[9], $dest
+	or warn "Can't utime $dest to " .
+	        scalar(localtime $stat[8]) . "/" .
+		scalar(localtime $stat[9]) .
+		": $!";
+}

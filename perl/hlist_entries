@@ -1,0 +1,24 @@
+=head2 getlist
+
+=for category Tk
+
+    @list = $hlist->getlist;
+
+Get a flat list of all entries in a Tk::HList widget.
+
+This is by Marc Dashevsky (and not yet tested).
+
+=cut
+
+sub Tk::HList::getlist {
+    my $tree = shift;
+    my @ListOfAllEntries;
+    my @list = $tree->infoChildren(shift);
+    if (@list) {
+	foreach my $entry (@list) {
+	    push @ListOfAllEntries, $entry;
+	    push @ListOfAllEntries, $tree->getlist($entry);
+	}
+    }
+    @ListOfAllEntries;
+}

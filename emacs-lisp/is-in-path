@@ -1,0 +1,17 @@
+(defun XXX-is-in-path (prog)
+  "For program name PROG return nil, if there is no such programm in $PATH or
+the complete pathname to the program."
+  (let ((path (parse-colon-path (getenv "PATH")))
+	(found nil)
+	currpath
+	dir)
+    (while (and path
+		(not found))
+      (setq dir (car path))
+      (setq currpath (concat dir (char-to-string directory-sep-char) prog))
+      (if (and (file-exists-p currpath)
+	       (file-executable-p currpath))
+	  (setq found currpath))
+      (setq path (cdr path))
+    )
+    found))

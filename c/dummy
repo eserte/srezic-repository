@@ -1,0 +1,3 @@
+/* a dummy function */
+void dummy(void) {
+}

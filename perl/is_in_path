@@ -1,0 +1,30 @@
+=head2 is_in_path($prog)
+
+=for category File
+
+Return the pathname of $prog, if the program is in the PATH, or undef
+otherwise.
+
+DEPENDENCY: file_name_is_absolute
+
+=cut
+
+sub is_in_path {
+    my($prog) = @_;
+    return $prog if (file_name_is_absolute($prog) and -f $prog and -x $prog);
+    require Config;
+    my $sep = $Config::Config{'path_sep'} || ':';
+    foreach (split(/$sep/o, $ENV{PATH})) {
+	if ($^O eq 'MSWin32') {
+	    # maybe use $ENV{PATHEXT} like maybe_command in ExtUtils/MM_Win32.pm?
+	    return "$_\\$prog"
+		if (-x "$_\\$prog.bat" ||
+		    -x "$_\\$prog.com" ||
+		    -x "$_\\$prog.exe" ||
+		    -x "$_\\$prog.cmd");
+	} else {
+	    return "$_/$prog" if (-x "$_/$prog" && !-d "$_/$prog");
+	}
+    }
+    undef;
+}

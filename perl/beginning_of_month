@@ -1,0 +1,18 @@
+=head2 beginning_of_month($time)
+
+=for category Date
+
+Return time of beginning of month, 0:00:00. $time is optional and set to
+current time, if missing.
+
+=cut
+
+sub beginning_of_month {
+    require Time::Local;
+    my $t = shift;
+    $t = time if !defined $t;
+    my @l = localtime $t;
+    $l[0] = $l[1] = $l[2] = 0;
+    $l[3] = 1;
+    Time::Local::timelocal(@l);
+}

@@ -1,0 +1,21 @@
+=head2 parse_geometry_string($geometry)
+
+=for category Tk
+
+Return a list (x, y, width, height) for the given $geometry.
+
+=cut
+
+sub parse_geometry_string {
+    my $geometry = shift;
+    my @extends = (0, 0, 0, 0);
+    if ($geometry =~ /([-+]?\d+)x([-+]?\d+)/) {
+	$extends[2] = $1;
+	$extends[3] = $2;
+    }
+    if ($geometry =~ /[-+](\d+)[-+](\d+)/) {
+	$extends[0] = $1;
+	$extends[1] = $2;
+    }
+    @extends;
+}

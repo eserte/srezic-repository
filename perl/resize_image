@@ -1,0 +1,118 @@
+=head2 resize_image(%args)
+
+=for category Gfx
+
+Resize an image with the GD module, or the netpbm package. Arguments
+are:
+
+=over 4
+
+=item -in
+
+Source image file.
+
+=item -infmt
+
+Format of the source image file (png, xbm, xpm, gd, gd2, jpg).
+Otherwise it is determined from the extension of the source file.
+
+=item -out
+
+Destination image file.
+
+=item -outfmt
+
+Format of the destination image file (png, gd, gd2, jpg).
+Otherwise it is determined from the extension of the destination file.
+
+=item -height
+
+Height of the destination file.
+
+=item -width
+
+Width of the destination file.
+
+=back
+
+DEPENDENCY: is_is_path
+
+=cut
+
+sub resize_image {
+    my(%args) = @_;
+    my $in     = $args{-in}  || die "No -in file specified";
+    my $out    = $args{-out} || die "No -out file specified";
+    my $infmt  = $args{-infmt};
+    if (!defined $infmt) {
+	($infmt = $in) =~ s/^.*\.([^.]+)$/$1/;
+    }
+    if ($infmt eq 'jpeg') { $infmt = 'jpg' }
+    my $outfmt = $args{-outfmt};
+    if (!defined $outfmt) {
+	($outfmt = $out) =~ s/^.*\.([^.]+)$/$1/;
+    }
+    my $width  = $args{-width};
+    my $height = $args{-height};
+
+    eval {
+	require GD;
+
+	my $constructor =
+	    {'png' => 'newFromPng',
+	     'xbm' => 'newFromXbm',
+	     'xpm' => 'newFromXpm',
+	     'gd2' => 'newFromGd2',
+	     'gd'  => 'newFromGd',
+	     'jpg' => 'newFromJpeg',
+	     'gif' => 'newFromGif', # for old GD's
+	    }->{$infmt};
+	my $output_meth =
+	    {'png' => 'png',
+	     'jpg' => 'jpeg',
+	     'jpeg'=> 'jpeg',
+	     'gd'  => 'gd',
+	     'gd2' => 'gd2',
+	     'gif' => 'gif', # for old GD's
+	    }->{$outfmt};
+	if (!$constructor || !$output_meth) {
+	    die "No constructor or output method found";
+	}
+
+	open(IN, $in) or die "Could not open $in: $!";
+	binmode IN;
+	my $in_img = GD::Image->$constructor(\*IN);
+	close IN;
+	$in_img or die "Could not recognize image data in $in";
+
+	my $out_img = GD::Image->new($width, $height);
+	$out_img or die "Could not create empty GD image";
+	$out_img->copyResized($in_img, 0, 0, 0, 0,
+			      $width, $height,
+			      $in_img->getBounds);
+	open(OUT, ">$out") or die "Can't write to $out: $!";
+	binmode OUT;
+	print OUT $out_img->$output_meth();
+	close OUT;
+    };
+    if ($@) {
+	warn $@ if $^W;
+	if (is_in_path("pnmscale")) {
+	    my $constructor =
+		{'gif' => 'giftopnm',
+		 'jpg' => 'djpeg',
+		 'png' => 'pngtopnm',
+		 'xpm' => 'xpmtoppm',
+		}->{$infmt};
+	    my $output =
+		{'gif' => 'ppmtogif',
+		 'jpg' => 'cjpeg',
+		 'png' => 'pnmtopng',
+		 'xpm' => 'ppmtoxpm',
+		}->{$outfmt};
+	    system("$constructor $in | " .
+		   "pnmscale -xsize $args{-width} -ysize $args{-height} | " .
+		   "$output > $out");
+	}
+    }
+}

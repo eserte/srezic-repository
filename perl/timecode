@@ -1,0 +1,19 @@
+=head2 timecode(sub)
+
+=for category Benchmark
+
+Times a piece of code.
+
+=cut
+
+sub timecode (&) {
+    my $code = shift;
+    my $begin = Tk::timeofday();
+    if (ref $code eq 'CODE') {
+	$code->();
+    } else {
+	eval $code; warn $@ if $@;
+    }
+    my $end   = Tk::timeofday();
+    print STDERR ($end - $begin) . " s\n";
+}

@@ -1,0 +1,39 @@
+proc currmem {{pid ""}} {
+    if {$pid == ""} {
+	set pid [pid]
+    }
+    if {![catch {set map [open /proc/$pid/map r]}]} {
+	set mem 0
+	set realmem 0
+	while {![eof $map]} {
+	    set l [split [gets $map] " "]
+	    if {[lindex $l 1] != "" && [lindex $l 0] != ""} {
+		set delta [expr [lindex $l 1] - [lindex $l 0]]
+		incr mem $delta
+		if {[lindex $l 11] != "vnode"} {
+		    incr realmem $delta
+		}
+	    }
+	}
+	close $map
+	return [list $mem $realmem]
+    } elseif {![catch {set map [open /proc/$pid/maps r]}]} {
+	set mem 0
+	set realmem 0
+	while {![eof $map]} {
+	    set l [split [gets $map] " +"]
+	    foreach {start end} [split [lindex $l 0] "-"] { }
+	    if {$start != "" && $end != ""} {
+		set delta [expr 0x$end - 0x$start]
+		incr mem $delta
+		if {[lindex $l 9] == ""} {
+		    incr realmem $delta
+		}
+	    }
+	}
+	close $map
+	return [list $mem $realmem]
+    } else {
+	return ""
+    }
+}

@@ -1,0 +1,54 @@
+=head2 region_cmp($a1,$a2,$b1,$b2)
+
+=for category Misc
+
+Compares two one-dimensional regions. The regions are specified by the
+start and end coordinates. The results are:
+
+=over 4
+
+=item before
+
+The first region is completely before the second region.
+
+=item after
+
+The first region is completely after the second region.
+
+=item equals
+
+The both regions are equal.
+
+=item in
+
+The first region is completely in the second region.
+
+=item overlaps
+
+The second region is completely in the first region.
+
+=item overlaps_before
+
+The two regions overlap partly, the first region starts before the
+second one.
+
+=item overlaps_after
+
+The two regions overlap partly, the first region ends after the
+second one.
+
+=back
+
+=cut
+
+sub region_cmp {
+    my($a1,$a2, $b1,$b2) = @_;
+    return "before"          if ($a2 < $b1);
+    return "after"           if ($a1 > $b2);
+    return "equals"          if ($a1 == $b1 && $a2 == $b2);
+    return "overlaps"        if ($a1 <= $b1 && $a2 >= $b2);
+    return "overlaps_before" if ($a1 <= $b1 && $a2 <= $b2);
+    return "overlaps_after"  if ($a1 >= $b1 && $a2 >= $b2);
+    return "in"              if ($a1 >= $b1 && $a1 <= $b2 &&
+				 $a2 >= $b1 && $a2 <= $b2);
+}

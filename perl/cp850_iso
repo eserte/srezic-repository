@@ -1,0 +1,14 @@
+=head2 cp850_iso($s)
+
+=for category Conv
+
+Translate string from cp850 encoding to iso-8859-1 encoding. Only
+german umlauts are handled.
+
+=cut
+
+sub cp850_iso {
+    my $s = shift;
+    $s =~ tr/\204\224\201\216\231\232\341\202\370/äöüÄÖÜßé°/;
+    $s;
+}

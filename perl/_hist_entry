@@ -1,0 +1,22 @@
+=head2 _hist_entry({ entry args }, { histentry args})
+
+=for category Tk
+
+    $top->_hist_entry(...);
+
+Create a HistEntry widget, if possible, otherwise an Entry widget.
+
+=cut
+
+sub Tk::Widget::_hist_entry {
+    my($top, $entry_args, $hist_entry_args) = @_;
+    my $Entry = "Entry";
+    my @extra_args;
+    eval {
+	require Tk::HistEntry;
+        Tk::HistEntry->VERSION(0.33);
+	$Entry = "SimpleHistEntry";
+	@extra_args = %$hist_entry_args;
+    };
+    $top->$Entry(%$entry_args);
+}

@@ -1,0 +1,19 @@
+=head2 host_is_up($host)
+
+=for category Net
+
+Return true if $host is up (that is, is accessible by ping).
+
+=cut
+
+sub host_is_up {
+    my $host = shift;
+    # es scheint, als ob drei Pakete nötig sind, weil die ersten beiden
+    # verloren gehen?!
+    my @args = qw(-q -c 3);
+#      if ($^O =~ /linux/) {
+#  	push @args, qw(-w 10);
+#      }
+    system("ping @args $host 2>/dev/null 1>/dev/null");
+    $?/256 == 0;
+}

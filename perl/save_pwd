@@ -1,0 +1,20 @@
+=head2 _save_pwd(sub { ... })
+
+=for category File
+
+Save the current directory and assure that outside the block the old
+directory will still be valid.
+
+=cut
+
+sub _save_pwd (&) {
+    my $code = shift;
+    require Cwd;
+    my $pwd = Cwd::cwd();
+    eval {
+	$code->();
+    };
+    my $err = $@;
+    chdir $pwd or die "Can't chdir back to $pwd: $!";
+    die $err if $err;
+}

@@ -1,0 +1,21 @@
+=head2 parse_rsync_path($path)
+
+=for category File
+
+Parse rsync path and return the following values in a hash: user,
+host, path.
+
+=cut
+
+sub parse_rsync_path {
+    my $path = shift;
+    if ($path =~ /^(?:([^\@]+)\@)?([^:]+):(.*)/) {
+	(user => $1 || $ENV{USER},
+	 host => $2,
+	 path => $3,
+	);
+    } else {
+	warn "Can't parse <$path>";
+	();
+    }
+}

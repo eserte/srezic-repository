@@ -1,0 +1,24 @@
+/*
+
+A split function, just like a simpler version of the perl function ---
+splits only by char, not by regex.
+
+DEPENDENCIES:
+
+#include <vector>
+#include <string>
+#include <iostream>
+
+*/
+vector<string> split(string in, char splitchar) {
+  vector<string> res;
+  int pos = 0;
+  int newpos;
+  while((newpos = in.find(splitchar, pos)) >= 0) {
+    cerr << pos << " " << newpos<<endl;
+    res.push_back(in.substr(pos, newpos-pos));
+    pos = newpos+1;
+  }
+  res.push_back(in.substr(pos));
+  return res;
+}

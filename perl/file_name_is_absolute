@@ -1,0 +1,25 @@
+=head2 file_name_is_absolute($file)
+
+=for category File
+
+Return true, if supplied file name is absolute. This is only necessary
+for older perls where File::Spec is not part of the system.
+
+=cut
+
+BEGIN {
+    if (eval { require File::Spec; defined &File::Spec::file_name_is_absolute }) {
+	*file_name_is_absolute = \&File::Spec::file_name_is_absolute;
+    } else {
+	*file_name_is_absolute = sub {
+	    my $file = shift;
+	    my $r;
+	    if ($^O eq 'MSWin32') {
+		$r = ($file =~ m;^([a-z]:(/|\\)|\\\\|//);i);
+	    } else {
+		$r = ($file =~ m|^/|);
+	    }
+	    $r;
+	};
+    }
+}

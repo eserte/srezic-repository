@@ -1,0 +1,13 @@
+=head2 fill_line($text[, $linelength])
+
+=for category Text
+
+Fill line with spaces. $linelength is optional and defaults to 80 characters.
+
+=cut
+
+sub fill_line {
+    my $text = shift;
+    my $linelength = shift || 80; # XXX get from "tput co"?
+    $text . (" " x ($linelength - length($text)));
+}

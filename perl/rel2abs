@@ -1,0 +1,36 @@
+=head2 rel2abs($path,$base)
+
+=for category File
+
+Re-implementation of File::Spec::rel2abs for older perl systems
+
+DEPENDENCY: file_name_is_absolute
+
+=cut
+
+sub rel2abs {
+    my($path, $base) = @_;
+    require File::Spec;
+    if (File::Spec->can("rel2abs")) {
+	File::Spec->rel2abs($path, $base);
+    } else {
+	if ( ! file_name_is_absolute( $path ) ) {
+	    # Figure out the effective $base and clean it up.
+	    if ( !defined( $base ) || $base eq '' ) {
+		require Cwd;
+		$base = Cwd::cwd() ;
+	    }
+	    elsif ( ! file_name_is_absolute( $base ) ) {
+		$base = rel2abs( $base ) ;
+	    }
+	    else {
+		$base = File::Spec->canonpath( $base );
+	    }
+
+	    # Glom them together
+	    $path = File::Spec->catdir( $base, $path ) ;
+	}
+
+	return File::Spec->canonpath( $path ) ;
+    }
+}

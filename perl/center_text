@@ -1,0 +1,18 @@
+=head2 center_text($text[, $linelength])
+
+=for category Text
+
+Center the text. $linelength is optional and defaults to 80 characters.
+
+=cut
+
+sub center_text {
+    my $text = shift;
+    my $linelength = shift || 80; # XXX get from "tput co"?
+    my $spaces = ($linelength-length($text))/2;
+    my $r = "";
+    if ($spaces > 0) {
+	$r = " " x $spaces;
+    }
+    $r . $text;
+}

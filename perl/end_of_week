@@ -1,0 +1,21 @@
+=head2 end_of_week($time)
+
+=for category Date
+
+Return time of end of week, 23:59:59. $time is optional and set to
+current time, if missing.
+
+=cut
+
+sub end_of_week {
+    require Time::Local;
+    my $t = shift;
+    $t = time if !defined $t;
+    my @l = localtime $t;
+    $l[6] = 7 if $l[6] == 0;
+    $t += 86400*(7-$l[6]);
+    @l = localtime $t;
+    $l[0] = $l[1] = 59;
+    $l[2] = 23;
+    Time::Local::timelocal(@l);
+}

@@ -1,0 +1,5 @@
+=for category Math
+
+=cut
+
+sub int_round { int($_[0]+0.5) }

@@ -1,0 +1,26 @@
+=head2 dimensions
+
+=for category Tk
+
+    ($width, $height) = $widget->dimensions;
+
+Tries hard to get the current dimensions.
+
+=cut
+
+sub Tk::Widget::dimensions {
+    my $w = shift;
+
+#    my $width = $w->cget(-width);
+    my $width = $w->width;
+    if (!defined $width || $width <= 1) {
+        $width = $w->reqwidth;
+    }
+#    my $height = $w->cget(-height);
+    my $height = $w->height;
+    if (!defined $height || $height <= 1) {
+        $height = $w->reqheight;
+    }
+
+    ($width, $height);
+}

@@ -1,0 +1,26 @@
+=head2 exec_bg(cmd, param1, ...)
+
+=for category System
+
+Execute command with parameters in background.
+
+=cut
+
+sub exec_bg {
+    my(@cmd) = @_;
+    if ($^O ne 'MSWin32') {
+	my $pid;
+	eval {
+	    $pid = fork;
+	    if ($pid == 0) {
+		exec @cmd;
+		die "Can't exec @cmd: $!";
+	    }
+	};
+	return if ($pid && !$@);
+    }
+
+    #warn "Fallback to system...\n";
+    # XXX use Spawn, if possible
+    system(join(" ", @cmd) . "&");
+}

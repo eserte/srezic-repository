@@ -1,0 +1,17 @@
+# from http://www.deja.com/getdoc.xp?AN=432747472
+# print canvas in multiple DIN A4 pages
+proc multi_page_print {} {
+    foreach {dd ss width height} [.w cget -scrollregion] break
+    set width [expr $width-$dd]
+    set height [expr $height-$ss]
+    if {$width>96*7} {
+	exec lpr << [.w postscript  -x $dd -y $ss  -width [expr $width/2]\  
+	-height $height]
+  
+	exec lpr << [.w postscript -x [expr $dd+$width/2] -y $ss \        
+	-width [expr $width/2] -height $height]
+    } else {
+	exec lpr << [.w postscript -x $dd -y $ss -width $width\  
+	-height $height]
+    }
+}

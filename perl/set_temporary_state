@@ -1,0 +1,33 @@
+=head2 set_temporary_state
+
+=for category Tk
+
+    $top->set_temporary_state($s, sub { ... });
+
+Change the toplevel state (withdraw, iconify) for the execution of the
+subroutine.
+
+=cut
+
+sub Tk::Toplevel::set_temporary_state {
+    my($top, $state, $sub) = @_;
+    my $old_state = $top->state;
+    unless (($old_state eq 'withdrawn' && $state eq 'withdraw') ||
+	    ($old_state eq 'iconic'    && $state eq 'iconify')) {
+	$top->$state();
+    } else {
+	undef $old_state;
+    }
+    $sub->();
+    if (defined $old_state) {
+	if ($old_state eq 'normal') {
+	    $top->deiconify;
+	} elsif ($old_state eq 'iconic') {
+	    $top->iconify
+	} elsif ($old_state eq 'withdrawn') {
+	    $top->withdraw;
+	} else {
+	    warn "Can't handle state $old_state in set_toplevel_state";
+	}
+    }
+}

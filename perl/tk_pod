@@ -1,0 +1,34 @@
+=head2 tk_pod($top, %args)
+
+=for category Tk
+
+Show pod, either with Tk::Pod (if available) or in a simple Text widget.
+Arguments: -file and -title
+
+=cut
+
+use vars qw(*TK_POD_TEXT);
+
+sub tk_pod {
+    my($top, %args) = @_;
+    eval {
+	require Tk::Pod;
+	$top->Pod(%args);
+    };
+    if ($@) {
+	require Pod::Text;
+	require Tk::ROText;
+	my $t = $top->Toplevel(-title => $args{-title} || "POD $args{-file}");
+	my $txt = $t->Scrolled("ROText",
+			       -scrollbars => "osoe",
+			       -wrap => "word",
+			       -relief => "flat",
+			       -highlightthickness => 0,
+			       -bd => 0,
+			      )->pack(-fill => "both", -expand => 1);
+	$txt->focus;
+	tie *TK_POD_TEXT, 'Tk::Text', $txt;
+	Pod::Text::pod2text($args{-file}, \*TK_POD_TEXT);
+	untie *TK_POD_TEXT;
+    }
+}

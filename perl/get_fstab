@@ -1,0 +1,32 @@
+=head2 get_fstab
+
+=for category System
+
+Return a list of devices in the fstab. This is an array of hash
+references containing: Device, Mountpoint, FStype, Options, Dump and
+Pass.
+
+=cut
+
+sub get_fstab {
+    my @fstab;
+    if (open(FSTAB, "/etc/fstab")) {
+	while(<FSTAB>) {
+	    s/\#.*//; # strip comments
+	    next if /^\s*$/; # skip empty lines
+	    my @l = split /\s+/;
+	    push @fstab,
+		{Device     => $l[0],
+		 Mountpoint => $l[1],
+		 FStype     => $l[2],
+		 Options    => $l[3],
+		 Dump       => $l[4],
+		 Pass       => $l[5],
+		};
+	}
+	close FSTAB;
+    } else {
+	warn "Can't open /etc/fstab";
+    }
+    @fstab;
+}

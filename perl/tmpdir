@@ -1,0 +1,18 @@
+=head2 tmpdir()
+
+=for category File
+
+Return temporary directory for this system. This is a small
+replacement for File::Spec::tmpdir.
+
+=cut
+
+sub tmpdir {
+    foreach my $d ($ENV{TMPDIR}, $ENV{TEMP},
+		   "/tmp", "/var/tmp", "/usr/tmp", "/temp") {
+	next if !defined $d;
+	next if !-d $d || !-w $d;
+	return $d;
+    }
+    undef;
+}

@@ -1,0 +1,30 @@
+=head2 moveentry
+
+=for category Tk
+
+    $hlist->moveentry($entrypath, -after|-before => $anotherentry);
+
+Move an C<Tk::HList> entry to another position.
+
+=cut
+
+sub Tk::HList::moveentry {
+    my($w,$entry,@to) = @_;
+    if (@to && $to[0] =~ /^-(after|before)$/ && $to[1] eq $entry) {
+	return; # nothing to do
+    }
+    my @info;
+    foreach my $col (0 .. $w->cget(-columns)-1) {
+	$info[$col] = [$w->itemConfigure($entry, $col)];
+    }
+    $w->delete("entry", $entry);
+    $w->add($entry, @to);
+    for my $i (0 .. $#info) {
+	my @config;
+	foreach my $def (@{ $info[$i] }) {
+	    push @config, $def->[0], $def->[4];
+	}
+	$w->itemConfigure($entry, $i, @config);
+    }
+}
+

@@ -1,0 +1,72 @@
+=head2 $top->chooseDirectory(%args)
+
+=for category Tk
+
+A directory selector. Possible arguments:
+
+    * -initialdir
+    * -title
+
+=cut
+
+sub Tk::Widget::chooseDirectory {
+    my($top, %args) = @_;
+
+    my $curr_dir = $args{-initialdir};
+    if (!defined $curr_dir) {
+	require Cwd;
+	$curr_dir = Cwd::cwd();
+    }
+    if (defined $args{-mustexist}) {
+	die "-mustexist is not yet implemented";
+    }
+
+    my $title = $args{-title} || "Choose directory:";
+
+    require Tk::DirTree;
+    my $t = $top->Toplevel;
+    $t->title($title);
+    my $ok = 0; # flag: "1" means OK, "-1" means cancelled
+
+    # Create Frame widget before the DirTree widget, so it's always visible
+    # if the window gets resized.
+    my $f = $t->Frame->pack(-fill => "x", -side => "bottom");
+
+    my $d;
+    $d = $t->Scrolled('DirTree',
+		      -scrollbars => 'osoe',
+		      -width => 35,
+		      -height => 20,
+		      -selectmode => 'browse',
+		      -exportselection => 1,
+		      -browsecmd => sub { $curr_dir = shift;
+					  if ($^O ne 'MSWin32') {
+					      $curr_dir =~ s|^//|/|; # bugfix
+					  }
+				        },
+
+		      # With this version of -command a double-click will
+		      # select the directory
+		      -command   => sub { $ok = 1 },
+
+		      # With this version of -command a double-click will
+		      # open a directory. Selection is only possible with
+		      # the Ok button.
+		      #-command   => sub { $d->opencmd($_[0]) },
+		     )->pack(-fill => "both", -expand => 1);
+    # Set the initial directory
+    exists &Tk::DirTree::chdir ? $d->chdir($curr_dir) : $d->set_dir($curr_dir);
+
+    $f->Button(-text => 'Ok',
+	       -command => sub { $ok =  1 })->pack(-side => 'left');
+    $f->Button(-text => 'Cancel',
+	       -command => sub { $ok = -1 })->pack(-side => 'left');
+    $t->OnDestroy(sub { $ok = -1 });
+    $f->waitVariable(\$ok);
+    $t->destroy if Tk::Exists($t);
+    if ($ok == 1) {
+	$curr_dir;
+    } else {
+	undef;
+    }
+}

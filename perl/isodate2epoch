@@ -1,0 +1,24 @@
+=head2 isodate2epoch($isodate)
+
+=for category Date
+
+Return time in seconds since UNIX epoch for the given ISO 8601 string
+(YYYYMMDDHHMMSS or YYYYMMDD). If Date::Manip is installed, more ISO
+formats are allowed.
+
+=cut
+
+sub isodate2epoch {
+    my $isodate = shift;
+    require Time::Local;
+    my($y,$m,$d,$H,$M,$S);
+    if ($isodate =~ /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/) {
+	($y,$m,$d,$H,$M,$S) = ($1,$2,$3,$4,$5,$6);
+    } elsif ($isodate =~ /^(\d{4})(\d{2})(\d{2})$/) { # crippled without time
+	($y,$m,$d,$H,$M,$S) = ($1,$2,$3,0,0,0);
+    } else {
+	require Date::Manip;
+        return Date::Manip::ParseDate($isodate);
+    }
+    Time::Local::timelocal($S,$M,$H,$d,$m-1,$y-1900);
+}

@@ -1,0 +1,13 @@
+=head2 leapyear($year)
+
+=for category Date
+
+Return true if the given year is a leap year.
+
+=cut
+
+sub leapyear {
+    my $year = $_[0];
+    ($year % 4 == 0 &&
+     (($year % 100 != 0) || ($year % 400 == 0)));
+}

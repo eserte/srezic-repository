@@ -1,0 +1,5 @@
+=for category Math
+
+=cut
+
+sub pi ()   { 4 * atan2(1, 1) } # 3.141592653

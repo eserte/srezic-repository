@@ -1,0 +1,92 @@
+=head2 send_email(%args)
+
+=for category Net
+
+Send an email with sendmail. %args can hold the following keys:
+
+=over 4
+
+=item -from
+
+The email address of the sender.
+
+=item -author
+
+The full name of the sender. Defaults to the gecos field in the passwd
+entry of the current user.
+
+=item -to
+
+The email address of the recipient.
+
+=item -subject
+
+The subject of the mail.
+
+=item -sendmailbin
+
+Use another sendmail path. Defaults to either /usr/sbin/sendmail or
+/usr/bin/sendmail.
+
+=item -text
+
+The mail body.
+
+=back
+
+=cut
+
+sub send_email {
+    my(%args) = @_;
+    my $mail_from    = $args{-from};
+    my $author       = $args{-author}  || (getpwuid($<))[0];
+    my $mail_to      = $args{-to}      || die "-to is missing";
+    my $mail_subject = $args{-subject} || "<no subject>";
+    my $sendmail_bin = $args{-sendmailbin};
+    my $text         = $args{-text};
+    
+    if (!defined $sendmail_bin) {
+	# modern unices
+        if (-x '/usr/sbin/sendmail') {
+            $sendmail_bin  = '/usr/sbin/sendmail';
+        } elsif (-x '/usr/lib/sendmail') {
+            $sendmail_bin  = '/usr/lib/sendmail';
+        }
+    }
+    
+    local *MAIL;
+    
+    my $pid = open(MAIL, "|-");
+        
+    if ($pid == 0) {
+        if (!defined $sendmail_bin) {
+            exec 'mail', '-s', $mail_subject, $mail_to;
+        } else {
+	    my @cmd = ($sendmail_bin, '-oi', '-odb', '-oem', '-t');
+	    if (1) { # XXX check whether this works everywhere!
+		push @cmd, "-f", $mail_from;
+	    }
+            exec @cmd;
+        }
+        die "Error while sending mail with <$sendmail_bin> " .
+	    "to <$mail_to>: $!";
+    }
+        
+    if (defined $sendmail_bin) {
+        if (!defined $mail_from || $mail_from eq '') {
+            $mail_from = "unknown";
+        }
+    }
+    
+    my $output .=
+	"From: " . $author . " <" . $mail_from . ">\n" .
+	"Subject: " . $mail_subject . "\n" .
+	"To: $mail_to\n" .
+        "\n" .
+        $text;
+    
+    print MAIL $output;
+    close MAIL;
+
+    1;
+}

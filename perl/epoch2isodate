@@ -1,0 +1,15 @@
+=head2 epoch2isodate($time)
+
+=for category Date
+
+Return time as ISO 8601 date from given time in seconds since UNIX epoch.
+
+=cut
+
+sub epoch2isodate {
+    my $time = shift;
+    my @l = localtime $time;
+    sprintf("%04d%02d%02d%02d%02d%02d",
+	    $l[5]+1900, $l[4]+1, $l[3],
+	    $l[2],      $l[1],   $l[0]);
+}

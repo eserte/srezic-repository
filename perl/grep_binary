@@ -1,0 +1,46 @@
+=head2 grep_binary($array_ref, $a)
+
+=for category Text
+
+$array_ref is an array reference to a list of elements.
+
+$a is the element you want to insert
+
+This function returns the index of the element of the array
+($array_ref) who's value is greater than $a.
+
+This function uses a bisection method of finding the element.
+
+Supplied by Doug Perham <dperham@dperham.eng.tvol.net> (original name
+was find_a_gt_b)
+
+=cut
+
+sub grep_binary {
+  my ($ar, $a) = @_;
+
+  my ($M, $N) = (0, $#{$ar});
+
+  my $n   = 0;
+  my $D   = '00'; # -- zero but true for first time.
+
+  while ($D && $M<=$N)
+  {
+    $n     = $M + $D;
+    my $p  = $a <=> $ar->[$n];
+
+    if ($p > 0)
+    {
+      $M = $n;
+      $n++;
+    }
+    else
+    {
+      $N = $n-1;
+      last unless $p;
+    }
+    $D     = ($N-$M+1) >> 1;
+  }
+
+  return $n;
+}

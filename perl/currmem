@@ -1,0 +1,42 @@
+=item currmem([$pid])
+
+=for category System
+
+Return ($mem, $realmem) of the current process or process $pid, if $pid
+is given.
+
+=cut
+
+sub currmem {
+    my $pid = shift || $$;
+    if (open(MAP, "/proc/$pid/map")) { # FreeBSD
+	my $mem = 0;
+	my $realmem = 0;
+	while(<MAP>) {
+	    my(@l) = split /\s+/;
+	    my $delta = (hex($l[1])-hex($l[0]));
+	    $mem += $delta;
+	    if ($l[11] ne 'vnode') {
+		$realmem += $delta;
+	    }
+	}
+	close MAP;
+	($mem, $realmem);
+    } elsif (open(MAP, "/proc/$pid/maps")) { # Linux
+	my $mem = 0;
+	my $realmem = 0;
+	while(<MAP>) {
+	    my(@l) = split /\s+/;
+	    my($start,$end) = split /-/, $l[0];
+	    my $delta = (hex($end)-hex($start));
+	    $mem += $delta;
+	    if (!defined $l[5] || $l[5] eq '') {
+		$realmem += $delta;
+	    }
+	}
+	close MAP;
+	($mem, $realmem);
+    } else {
+	undef;
+    }
+}

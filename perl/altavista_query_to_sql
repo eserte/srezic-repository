@@ -1,0 +1,16 @@
+# XXX not tested
+# implements +term -term to SQL conversion
+# From: Benjamin Goldberg <goldbb2@earthlink.net>
+# Message-Id: <3B677F94.C11E5A5D@earthlink.net>
+sub altavista_query_to_sql {
+    my $search = shift;
+    my(@where, @params);
+    while( $search =~ /([-+]?)(\"(?:\\.|[^\"])*\"?|\S+)\s*/g ) {
+	my $not = ($1 eq "-") ? "NOT" : "";
+	my $word = $2 =~ s/\"(?:\\.|[^\"])*\"?/$1/;
+	push @where, "($not column LIKE ?)"; # maybe CLIKE instead?
+	push @params, $word;
+    }
+    ["WHERE " . join(" AND ",@where), \@params];
+}
+

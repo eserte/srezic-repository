@@ -1,0 +1,27 @@
+=head2 tk_frameless($toplevel)
+
+Make the toplevel window frameless, but still accessible from the
+keyboard.
+
+=cut
+
+sub tk_frameless {
+    my $w = shift;
+    $w->overrideredirect(1);
+    $w->bind("<Enter>" => sub {
+		 $w->{CurrentFocus} = $w->focusCurrent;
+		 $w->focusForce;
+		 $w->grabGlobal;
+	     });
+    $w->bind("<Leave>" => sub {
+		 $w->grabRelease;
+	     });
+}
+#  - wm overrideredirect $W
+#  - bind on <Enter> event to:
+#      focus -force <saved-widget>
+#      grab set -global $W
+#  - bind on <Leave> event to:
+#      save focus'ed widget
+#      grab release $W
+#      focus $W (so that focus'ed widget doesn't keep focus)

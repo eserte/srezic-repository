@@ -1,0 +1,17 @@
+=head2 bg_system($cmd)
+
+=for category System
+
+Create a background process in a portable way.
+
+=cut
+
+sub bg_system {
+    my($cmd) = @_;
+
+    if ($^O eq 'MSWin32') {
+	system 1, $cmd;
+    } else {
+	system "$cmd &";
+    }
+}

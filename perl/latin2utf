@@ -1,0 +1,32 @@
+=head2 latin2utf (STRING)
+
+=for category Conv
+
+Uebersetzt eine Zeichenkette von Latin-1 (aka ISO-8859-1) nach
+UTF-8. UTF-8 wird fuer Latin-1 Zeichen folgendermassen kodiert:
+
+                 xxxxxxxx     ein latin-1 Zeichen
+                 ||||||||
+                 //||||||
+                // ||||||
+               //  ||||||
+              //   ||||||
+              ||   ||||||
+              vv   vvvvvv
+        110000xx 10xxxxxx     ergibt zwei Zeichen in UTF-8
+
+Gepostet von bayer@sdm.de (Ralf Bayer).
+
+=cut
+
+sub latin2utf {
+    my $string = shift;
+
+    $string =~
+	s/([\x80-\xff])/
+	    chr((((ord($1) & 0xc0) >> 6) | 0xc0)) .
+	    chr(( (ord($1) & 0x3f)       | 0x80))
+		/gex;
+
+    return $string;
+}

@@ -1,0 +1,47 @@
+=head2 files_in_dir(fileno)
+
+=for category File
+
+Return the number of files in directory specified by fileno.
+
+    open(DIR, "...");
+    $files = files_in_dir(fileno(DIR));
+
+Return -1 on failure.
+
+=cut
+
+use Inline C => <<'EOF';
+#include <sys/types.h>
+#include <dirent.h>
+#include <unistd.h>
+#include <stdlib.h>
+
+int files_in_dir(int fd) {
+    char *buf;
+    off_t dirsize;
+    int got;
+    int i = 0;
+    int pos = 0;
+
+    dirsize = lseek(fd, 0, SEEK_END);
+    lseek(fd, 0, SEEK_SET);
+    buf = malloc(dirsize);
+    if (!buf) {
+	return -1;
+    }
+
+    got = getdirentries(fd, buf, dirsize, NULL);
+    while (pos < got) {
+	struct dirent *d = (struct dirent*)(buf+pos);
+	if (d->d_fileno) {
+	    i++;
+	}
+	pos += d->d_reclen;
+    }
+
+    free(buf);
+    return i;
+}
+
+EOF

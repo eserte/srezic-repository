@@ -1,0 +1,7 @@
+=for category Math
+
+DEPENDENCY: pi
+
+=cut
+
+sub deg2rad { ($_[0]*pi)/180 }

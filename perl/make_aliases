@@ -1,0 +1,23 @@
+=item make_aliases($vars_array, [$from_package])
+
+=for category Misc
+
+Create aliases in the calling package for all variables in specified
+in C<$vars_array>. By default, variables are aliased against variables
+from the C<main> package, but this can be changed by giving the
+C<$from_package> argument.
+
+=cut
+
+sub make_aliases {
+    my($vars, $pkg) = @_;
+    $pkg = "main" if !defined $pkg;
+    my $topkg = (caller)[0];
+    my $code = "";
+    for (@$vars) {
+	my($sigil, $name) = $_ =~ /^(.)(.*)/;
+	$code .= '*' . $topkg . '::' . $name . ' = \\' . $sigil . $pkg . '::' . $name . ";\n";
+    }
+    #warn $code;
+    eval $code; die $@ if $@;
+}

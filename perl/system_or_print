@@ -1,0 +1,36 @@
+=head2 system_or_print(cmd, param1, ...)
+
+=for category System
+
+If the global variable $do_exec is set to a true value, then execute the
+given command with its parameters, otherwise print the command string to
+standard error. If Tk is running and there is a LogWindow, then the command
+string is logged to this widget.
+
+=cut
+
+use vars qw($do_exec); # our in 5.6.0
+
+sub system_or_print {
+    my(@cmd) = @_;
+
+    my $log_window;
+    if (defined &Tk::MainWindow::Existing) {
+	my($mw) = Tk::MainWindow::Existing();
+	if (defined $mw and
+	    Tk::Exists($mw->{LogWindow})) {
+	    $log_window = $mw->{LogWindow};
+	}
+    }
+    if ($log_window) {
+	$log_window->insert('end', join(" ", @cmd));
+	$log_window->see('end');
+	$log_window->update;
+    }
+
+    if ($do_exec) {
+	system @cmd;
+    } else {
+	print STDERR join(" ", @cmd), "\n";
+    }
+}

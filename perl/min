@@ -1,0 +1,21 @@
+=head2 min(...)
+
+=for category Math
+
+Return minimum value.
+
+=cut
+
+BEGIN {
+    if (eval { require List::Util; 1 }) {
+	*min = \&List::Util::min;
+    } else {
+	*min = sub {
+	    my $min = $_[0];
+	    foreach (@_[1..$#_]) {
+		$min = $_ if $_ < $min;
+	    }
+	    $min;
+	};
+    }
+}

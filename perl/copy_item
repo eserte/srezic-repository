@@ -1,0 +1,21 @@
+=head2 copy_item
+
+    $new_item = $c->copy_item($old_item);
+
+Copy an canvas item.
+
+=cut
+
+sub Tk::Canvas::copy_item {
+    my($c, $i) = @_;
+
+    my $type = $c->type($i);
+    my @coords = $c->coords($i);
+    my @old_config = $c->itemconfigure($i);
+    my @new_config;
+    foreach my $conf (@old_config) {
+	push @new_config, $conf->[0], $conf->[4];
+    }
+
+    $c->create($type, @coords, @new_config);
+}

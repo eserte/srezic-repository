@@ -1,0 +1,22 @@
+=head2 end_of_month($time)
+
+=for category Date
+
+Return time of end of month, 23:59:59. $time is optional and set to
+current time, if missing.
+
+DEPENDENCY: leapyear
+
+=cut
+
+sub end_of_month {
+    require Time::Local;
+    my $t = shift;
+    $t = time if !defined $t;
+    my @l = localtime $t;
+    $l[3] = [31,28,31,30,31,30,31,31,30,31,30,31]->[$l[4]];
+    $l[3]++ if $l[4] == 1 && leapyear($l[5]+1900);
+    $l[0] = $l[1] = 59;
+    $l[2] = 23;
+    Time::Local::timelocal(@l);
+}

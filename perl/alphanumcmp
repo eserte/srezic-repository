@@ -1,0 +1,30 @@
+=head2 alphanumcmp
+
+=for category Text
+
+Do a mixed numeric/alpha compare of the both arguments.
+
+=cut
+
+sub alphanumcmp {
+    my($a, $b) = @_;
+    while($a ne '' and $b ne '') {
+	if ($a =~ /^(\D+)(.*)$/) {
+	    my $alph = $1;
+	    $a = $2;
+	    my $cmp = ($alph cmp substr($b, 0, length($alph)));
+	    return $cmp if ($cmp);
+	    return -1 if (substr($b, length($alph)) =~ /^\D/);
+	    $b = substr($b, length($alph));
+	} elsif ($a =~ /^(\d+)(.*)$/) {
+	    my $dig = $1;
+	    $a = $2;
+	    return +1 if ($b =~ /^\D/);
+	    $b =~ /^(\d+)(.*)$/;
+	    my $cmp = ($dig <=> $1);
+	    return $cmp if ($cmp);
+	    $b = $2;
+	}
+    }
+    0;
+}

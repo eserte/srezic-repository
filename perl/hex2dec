@@ -1,0 +1,21 @@
+=head2 hex2dec($hex)
+
+=for category Math
+
+Similar to C<hex($hex)>, but works also with bignums.
+
+=cut
+
+sub hex2dec {
+    my $start = lc shift;
+    my %hexdigit;
+    @hexdigit{ 0 .. 9 } = ( 0 .. 9);
+    @hexdigit{'a'..'f'} = (10 ..15);
+    my $r = 0;
+    my $multi = 1;
+    for my $s (reverse split //, $start) {
+	$r += $multi*$hexdigit{$s};
+	$multi*=16;
+    }
+    $r;
+}

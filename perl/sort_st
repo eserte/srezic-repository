@@ -1,0 +1,21 @@
+=item sort_s($cmpsub, $keysub, @array)
+
+Schwarztian Transform sort. Usage:
+
+@data = sort_st(sub { $a cmp $b },
+		sub { (split(/\|/))[0] },
+		@data)
+
+=cut
+
+sub sort_st(&&\@) {
+    my($cmp, $split, $arrref) = @_;
+    my $_cmp = sub {
+	local($a,$b) = ($a->[0], $b->[0]);
+	&$cmp;
+    };
+    map  { $_->[1] }
+    sort $_cmp
+    map  { [&$split, $_] }
+    @$arrref;
+}

@@ -1,0 +1,15 @@
+=head2 qs(@args)
+
+=for category System
+
+Quote arguments to be safe for a /bin/sh-compatible shell.
+
+=cut
+
+sub qs {
+    join(" ", map {
+	my $s = $_;
+	$s =~ s/\'/\'\"\'\"\'/g;
+	"'${s}'";
+    } @_);
+}

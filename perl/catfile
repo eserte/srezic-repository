@@ -1,0 +1,22 @@
+=head2 catfile($dirname, $dirname, ..., $basename)
+
+=for category File
+
+Take dirname and basename portions and return an entire path. This is
+only necessary for older perls where File::Spec is not part of the
+system.
+
+=cut
+
+sub catfile {
+    my(@args) = @_;
+    my $path;
+    eval {
+        require File::Spec;
+        $path = File::Spec->catfile(@args);
+    };
+    if ($@) {
+        $path = join("/", @args);
+    }
+    $path;
+}
