@@ -1,0 +1,52 @@
+=head2 ignore_file($file, $group)
+
+=for category File
+
+Return true if $file should be ignored. $group is optional and may
+specify a narrower ignore group.
+
+=cut
+
+sub ignore_file {
+    my($file, $group) = @_;
+    my $ignore_groups =
+	{backup => qr{ ( ~                # emacs backup files
+                       | \.\#.*\.\d+\.\d+ # CVS backup files (?)
+		       | \.bak		  # standard backup file
+		       | (?:^|/)Makefile\.old # perl Makefile.PL backup
+                       )$
+                     }x,
+	 cvs    => qr{ (?:^|/)CVS(?:/|$) }x,
+	 mac    => qr{ (?:^|/)\.DS_Store(?:/|$) }x,
+	 c      => qr{ ( (?: \.o )$
+		       | (?:^|/) (?:\.libs|\.deps) (?:/|$)
+		       ) }x, # what about .lo files?
+	 core   => qr{ (?:^|/)
+		       ( core\.\d+ # linux style
+		       | .*\.core  # bsd style
+		       | core      # old unix style
+		       )$ }x,
+	 perl   => qr{ (?:^|/)
+		       (?: blib
+		       |   _Inline
+		       |   pm_to_blib
+		       )
+		       (?:/|$) }x,
+	 java   => qr{ ( \.class
+		       )$ }x,
+	 tex    => qr{ ( \.aux
+		       | \.log
+		       | \.dvi
+		       )$ }x, # mind ".log" here!
+	};
+    if (!$group) {
+	$group = [ keys %$ignore_groups ];
+    } elsif (!UNIVERSAL::isa($group, "ARRAY")) {
+	$group = [ $group ];
+    }
+    my @ignore_rx = map { $ignore_groups->{$_} } @$group;
+    for my $rx (@ignore_rx) {
+	return 1 if $file =~ $rx;
+    }
+    0;
+}
