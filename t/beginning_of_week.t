@@ -2,20 +2,22 @@
 # -*- perl -*-
 
 #
-# $Id: beginning_of_week.t,v 1.1 2004/03/24 21:58:29 eserte Exp $
+# $Id: beginning_of_week.t,v 1.2 2004/04/08 12:45:42 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright (C) 2000 Onlineoffice. All rights reserved.
 #
 
+use strict;
+use FindBin;
 use Test;
 use Time::Local;
 # BEGIN DO
-do "../perl/beginning_of_week";
-do "../perl/end_of_week";
-do "../perl/beginning_of_month";
-do "../perl/end_of_month";
-do "../perl/leapyear";
+do "$FindBin::RealBin/../perl/beginning_of_week";
+do "$FindBin::RealBin/../perl/end_of_week";
+do "$FindBin::RealBin/../perl/beginning_of_month";
+do "$FindBin::RealBin/../perl/end_of_month";
+do "$FindBin::RealBin/../perl/leapyear";
 # END DO
 
 BEGIN { plan tests => 4+12+4 }

@@ -2,11 +2,12 @@
 # -*- perl -*-
 
 #
-# $Id: floor.t,v 1.1 2004/03/24 21:58:29 eserte Exp $
+# $Id: floor.t,v 1.2 2004/04/08 12:45:42 eserte Exp $
 # Author: Slaven Rezic
 #
 
 use strict;
+use FindBin;
 
 BEGIN {
     if (!eval q{
@@ -19,7 +20,7 @@ BEGIN {
 }
 
 # BEGIN DO
-do "../perl/floor";
+do "$FindBin::RealBin/../perl/floor";
 # END DO
 
 BEGIN { plan tests => 5 }

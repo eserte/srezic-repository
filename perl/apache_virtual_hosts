@@ -89,20 +89,22 @@ sub apache_virtual_hosts {
 	}
 
 	my($ip, $rest) = split /\s+/, $_, 2;
-	if ($rest =~ /is a NameVirtualHost/i) {
-	    $last_name_virtual_host = $ip;
-	} else {
-	    # normal servers
-	    my($name, $conf) = split /\s+/, $rest;
-	    next if $seen{$name};
-	    my($conf_file, $conf_line, $conf_date) = $get_conf->($conf);
-	    push @vhosts, {IP => $ip,
-			   Name => $name,
-			   ConfFile => $conf_file,
-			   ConfLine => $conf_line,
-			   ConfDate => $conf_date,
-			  };
-	    $seen{$name}++;
+	if (defined $rest) {
+	    if ($rest =~ /is a NameVirtualHost/i) {
+	    	$last_name_virtual_host = $ip;
+	    } else {
+		# normal servers
+		my($name, $conf) = split /\s+/, $rest;
+		next if $seen{$name};
+		my($conf_file, $conf_line, $conf_date) = $get_conf->($conf);
+		push @vhosts, {IP => $ip,
+			       Name => $name,
+			       ConfFile => $conf_file,
+			       ConfLine => $conf_line,
+			       ConfDate => $conf_date,
+			      };
+		$seen{$name}++;
+	    }
 	}
     }
     close VH;

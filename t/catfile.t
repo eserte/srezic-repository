@@ -2,14 +2,15 @@
 # -*- perl -*-
 
 #
-# $Id: catfile.t,v 1.1 2004/03/24 21:58:29 eserte Exp $
+# $Id: catfile.t,v 1.2 2004/04/08 12:45:42 eserte Exp $
 # Author: Slaven Rezic
 #
 
 use strict;
+use FindBin;
 
 # BEGIN DO
-do "../perl/catfile";
+do "$FindBin::RealBin/../perl/catfile";
 # END DO
 
 BEGIN {

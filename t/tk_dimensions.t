@@ -2,15 +2,16 @@
 # -*- perl -*-
 
 #
-# $Id: tk_dimensions.t,v 1.1 2004/03/24 21:58:29 eserte Exp $
+# $Id: tk_dimensions.t,v 1.2 2004/04/08 12:45:42 eserte Exp $
 # Author: Slaven Rezic
 #
 
 use strict;
+use FindBin;
 use Tk;
 
 # BEGIN DO
-do "../perl/tk_dimensions";
+do "$FindBin::RealBin/../perl/tk_dimensions";
 # END DO
 
 BEGIN {
@@ -37,12 +38,12 @@ check_dim($top, 300, 100);
 test_widget("Label",
 	    29, 18,
 	    -text => "Hello",
-	    -font => "Helvetica 10",
+	    -font => "Helvetica -10",
 	    );
 test_widget("Entry",
 	    128, 20,
 	    -width => 20,
-	    -font => "Helvetica 10",
+	    -font => "Helvetica -10",
 	    );
 test_widget("Frame",
 	    100, 100,
@@ -51,7 +52,7 @@ test_widget("Frame",
 	    );
 
 my $label = $top->Label(-text => "Hello",
-			-font => "Helvetica 10")->pack;
+			-font => "Helvetica -10")->pack;
 check_dim($label, 29, 18);
 $label->idletasks; # force geometry changes
 check_dim($label, 29, 18);
@@ -64,7 +65,7 @@ $label->destroy;
 
 my $frame = $top->Frame->pack;
 $frame->packPropagate(0);
-my $entry = $frame->Entry(-font => "Helvetica 10")->pack(-fill => "both");
+my $entry = $frame->Entry(-font => "Helvetica -10")->pack(-fill => "both");
 $frame->GeometryRequest(200,30);
 $frame->idletasks;
 check_dim($frame, 200, 30);

@@ -2,16 +2,18 @@
 # -*- perl -*-
 
 #
-# $Id: isodate2epoch.t,v 1.1 2004/03/24 21:58:30 eserte Exp $
+# $Id: isodate2epoch.t,v 1.2 2004/04/08 12:45:42 eserte Exp $
 # Author: Slaven Rezic
 #
 # Copyright (C) 2000 Onlineoffice. All rights reserved.
 #
 
+use strict;
+use FindBin;
 use Test;
 # BEGIN DO
-do "../perl/isodate2epoch";
-do "../perl/epoch2isodate";
+do "$FindBin::RealBin/../perl/isodate2epoch";
+do "$FindBin::RealBin/../perl/epoch2isodate";
 # END DO
 
 BEGIN { plan tests => 5 }
