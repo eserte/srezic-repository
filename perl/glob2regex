@@ -1,0 +1,49 @@
+=head2 glob2regex
+
+Turn a supplied glob into a regular expression.
+
+This is taken from L<http://wuarchive.wustl.edu/mirrors/NetBSD/NetBSD-current/pkgsrc/pkgtools/pkglint/files/lintpkgsrc.pl>
+
+=cut
+
+sub glob2regex
+    {
+    my($glob) = @_;
+    my(@chars, $in_alt);
+    my($regex);
+
+    @chars = split(//, $glob);
+    while (defined($_ = shift @chars))
+	{
+	if ($_ eq '*')
+	    { $regex .= '.*'; }
+	elsif ($_ eq '?')
+	    { $regex .= '.'; }
+	elsif ($_ eq '+')
+	    { $regex .= '.'; }
+	elsif ($_ eq '\\+')
+	    { $regex .= $_ . shift @chars; }
+	elsif ($_ eq '.' || $_ eq '|' )
+	    { $regex .= quotemeta; }
+	elsif ($_ eq '{' )
+	    { $regex .= '('; ++$in_alt; }
+	elsif ($_ eq '}' )
+	    {
+	    if (!$in_alt)		# Error
+		{ return undef; }
+	    $regex .= ')';
+	    --$in_alt;
+	    }
+	elsif ($_ eq ','  && $in_alt)
+	    { $regex .= '|'; }
+	else
+	    { $regex .= $_; }
+	}
+    if ($in_alt)			# Error
+	{ return undef; }
+    if ($regex eq $glob)
+	{ return(''); }
+#    if ($opt{D})
+#	{ print "glob2regex: $glob -> $regex\n"; }
+    '^'.$regex.'$';
+    }
