@@ -1,0 +1,17 @@
+=head2 trim($string)
+
+=for category Text
+
+Trim starting and leading white space and squeezes white space to a
+single space.
+
+=cut
+
+sub trim ($) {
+    my $s = shift;
+    return $s if !defined $s;
+    $s =~ s/^\s+//;
+    $s =~ s/\s+$//;
+    $s =~ s/\s+/ /;
+    $s;
+}
