@@ -2,11 +2,12 @@
 # -*- perl -*-
 
 #
-# $Id: alphanumcmp.t,v 1.1 2004/03/24 21:58:30 eserte Exp $
+# $Id: alphanumcmp.t,v 1.2 2004/04/08 12:41:13 eserte Exp $
 # Author: Slaven Rezic
 #
 
 use strict;
+use FindBin;
 
 BEGIN {
     if (!eval q{
@@ -21,7 +22,7 @@ BEGIN {
 }
 
 # BEGIN DO
-do "../perl/alphanumcmp";
+do "$FindBin::RealBin/../perl/alphanumcmp";
 # END DO
 
 BEGIN { plan tests => 6 }
