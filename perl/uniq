@@ -1,0 +1,24 @@
+=head2 uniq { code } @array
+
+=for category Text
+
+The given array gets sorted and uniqified. XXX Maybe should not be sorted?
+
+By the perlmonk shifford (http://www.perlmonks.org/index.pl?node_id=348263)
+
+=cut
+
+sub uniq(&@)
+{
+    my($cmpsub, @list)=@_;
+    my $last = shift @list
+      or return ();
+    my @ret =($last);
+    foreach (@list)
+    {
+      push(@ret,$_)
+        unless sortcmp($cmpsub,$_,$last)==0;
+      $last = $_;
+    }
+    @ret;
+}
