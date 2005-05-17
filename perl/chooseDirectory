@@ -9,7 +9,8 @@ A directory selector. Possible arguments:
 
 =cut
 
-sub Tk::Widget::chooseDirectory {
+if (!Tk::Widget->can("chooseDirectory")) {
+*Tk::Widget::chooseDirectory = sub {
     my($top, %args) = @_;
 
     my $curr_dir = $args{-initialdir};
@@ -63,10 +64,10 @@ sub Tk::Widget::chooseDirectory {
 	       -command => sub { $ok = -1 })->pack(-side => 'left');
     $t->OnDestroy(sub { $ok = -1 });
     $f->waitVariable(\$ok);
-    $t->destroy if Tk::Exists($t);
-    if ($ok == 1) {
-	$curr_dir;
-    } else {
-	undef;
+    if ($ok == -1) {
+	undef $curr_dir;
     }
+    $t->destroy if Tk::Exists($t);
+    $curr_dir;
+};
 }
