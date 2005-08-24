@@ -1,0 +1,19 @@
+=head2 slurp($file)
+
+=for category File
+
+Return content of the file I<$file>. Die if the file is not readable.
+
+=cut
+
+sub slurp ($) {
+    my($file) = @_;
+    my $fh;
+    my $buf;
+    open $fh, $file
+	or die "Can't slurp file $file: $!";
+    local $/ = undef;
+    $buf = <$fh>;
+    close $fh;
+    $buf;
+}
