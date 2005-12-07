@@ -1,0 +1,34 @@
+=item sort_by_ordered_array($array_to_sort, $ordered_array, %args)
+
+%args may be:
+
+   atend => 1: put the elements from the ordered array to end
+	       (default: to beginning)
+
+   fallbackcmp => sub { $_[0] cmp $_[1] }: fallback subroutine for
+	       elements not in the ordered array
+
+=cut
+
+sub sort_by_ordered_array {
+    my($array_to_sort, $ordered_array, %args) = @_;
+
+    my %sort_order;
+    {
+	my $i = 0;
+	if ($args{atend}) {
+	    %sort_order = map { ($_ => ++$i) } reverse @$ordered_array;
+	} else {
+	    %sort_order = map { ($_ => --$i) } reverse @$ordered_array;
+	}
+    }
+
+    # fallbackcmp => sub { $_[0] cmp $_[1] }
+    my $fallback_cmp = $args{fallbackcmp} || sub { 0 };
+
+    no warnings 'uninitialized';
+    sort {
+	$sort_order{$a} <=> $sort_order{$b} ||
+	$fallback_cmp->($a, $b);
+    } @$array_to_sort;
+}
