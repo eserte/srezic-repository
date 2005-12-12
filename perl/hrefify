@@ -1,0 +1,30 @@
+=head2 hrefify($text)
+
+Create <a href="...">...</a> tags around things which look like URLs
+and HTML-escape everything else.
+
+=cut
+
+sub hrefify {
+    my($text) = @_;
+
+    require HTML::Entities;
+    my $enc = sub {
+	HTML::Entities::encode_entities_numeric($_[0]);
+    };
+
+    my $lastpos;
+    my $ret = "";
+    while($text =~ m{(.*)((?:https?|ftp)://\S+)}g) {
+	my($plain, $href) = ($1, $2);
+	$ret .= $enc->($plain);
+	$ret .= qq{<a href="} . $enc->($href) . qq{">} . $enc->($href) . qq{</a>};
+	$lastpos = pos($text);
+    }
+    if (!defined $lastpos) {
+	$ret .= $enc->($text);
+    } else {
+	$ret .= $enc->(substr($text, $lastpos));
+    }
+    $ret;
+}
