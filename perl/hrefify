@@ -10,7 +10,7 @@ sub hrefify {
 
     require HTML::Entities;
     my $enc = sub {
-	HTML::Entities::encode_entities_numeric($_[0]);
+	HTML::Entities::encode_entities_numeric($_[0], q{<>&"'\\\\\177-\x{fffd}});
     };
 
     my $lastpos;
