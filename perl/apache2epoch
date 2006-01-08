@@ -1,0 +1,25 @@
+=head2 apache2epoch($time)
+
+=for category Date
+
+Given an apache accesslog date/time (21/Jul/2003:21:30:19 +0200)
+return a Unix epoch time. Return undef if not parseable.
+
+=cut
+
+sub apache2epoch {
+    my $str = shift;
+    my($d,$m,$y,$H,$M,$S,$tzsig,$tzh,$tzm) = $str =~ m[(\d{1,2})/(...)/(\d{4}):(\d{2}):(\d{2}):(\d{2})\s+([+-])?(\d{2})(\d{2})];
+    if (defined $d) {
+	$m = {qw(Jan 0 Feb 1 Mar 2 Apr 3 May 4 Jun 5
+		 Jul 6 Aug 7 Sep 8 Oct 9 Nov 10 Dec 11)}->{$m};
+	require Time::Local;
+	my $tz_offset = $tzm*60 + $tzh*3600;
+	$tz_offset *= -1 if $tzsig eq '-';
+	my $epoch = Time::Local::timegm($S,$M,$H,$d,$m,$y);
+	$epoch -= $tz_offset;
+	$epoch;
+    } else {
+	undef;
+    }
+}
