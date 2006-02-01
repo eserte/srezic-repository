@@ -1,0 +1,19 @@
+=head2 module_exists($module)
+
+Return true if the module exists in @INC
+
+=cut
+
+sub module_exists {
+    my($filename) = @_;
+    $filename =~ s{::}{/}g;
+    $filename .= ".pm";
+    return 1 if $INC{$filename};
+    foreach $prefix (@INC) {
+	my $realfilename = "$prefix/$filename";
+	if (-r $realfilename) {
+	    return 1;
+	}
+    }
+    return 0;
+}
