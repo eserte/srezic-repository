@@ -9,7 +9,7 @@ sub module_exists {
     $filename =~ s{::}{/}g;
     $filename .= ".pm";
     return 1 if $INC{$filename};
-    foreach $prefix (@INC) {
+    foreach my $prefix (@INC) {
 	my $realfilename = "$prefix/$filename";
 	if (-r $realfilename) {
 	    return 1;
