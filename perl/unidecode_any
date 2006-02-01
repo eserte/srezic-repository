@@ -14,7 +14,7 @@ sub unidecode_any {
     my $res = "";
 
     for (split //, $text) {
-	my $conv = eval { Encode::encode($encoding, $_, Encode::FB_CROAK) };
+	my $conv = eval { Encode::encode($encoding, $_, Encode::FB_CROAK()) };
 	if ($@) {
 	    $res .= Text::Unidecode::unidecode($_);
 	} else {
