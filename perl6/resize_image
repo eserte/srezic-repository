@@ -1,0 +1,126 @@
+=head2 resize_image(%args)
+
+=for category Gfx
+
+Resize an image with the GD module, or the netpbm package. Arguments
+are:
+
+=over 4
+
+=item -in
+
+Source image file.
+
+=item -infmt
+
+Format of the source image file (png, xbm, xpm, gd, gd2, jpg).
+Otherwise it is determined from the extension of the source file.
+
+=item -out
+
+Destination image file.
+
+=item -outfmt
+
+Format of the destination image file (png, gd, gd2, jpg).
+Otherwise it is determined from the extension of the destination file.
+
+=item -height
+
+Height of the destination file.
+
+=item -width
+
+Width of the destination file.
+
+=back
+
+DEPENDENCY: is_is_path
+
+XXX DOES NOT WORK YET!
+
+=cut
+
+sub resize_image ($in, $out, $width, $height, ?$infmt, ?$outfmt) {
+    if !defined $infmt {
+        ($infmt = $in) =~ s{^.*\.([^.]+)$}{$1};
+    }
+    if !defined $outfmt {
+        ($outfmt = $out) =~ s{^.*\.([^.]+)$}{$1};
+    }
+    for ($infmt, $outfmt) -> $fmt {
+        $fmt = 'jpg' if $fmt eq 'jpeg';
+    }
+    try {
+        use perl5:GD; # XXX why not require?
+
+        my $constructor = 
+            do given $infmt {
+                when 'png' { 'newFromPng'  }
+                when 'xbm' { 'newFromXbm'  }
+                when 'xpm' { 'newFromXpm'  }
+                when 'gd2' { 'newFromGd2'  }
+                when 'gd'  { 'newFromGd'   }
+                when 'jpg' { 'newFromJpeg' }
+                when 'gif' { 'newFromGif'  }
+                default    { die "$infmt is not supported by GD" }
+            };
+        my $output_meth =
+            do given $outfmt {
+                when 'png' { 'png'  }
+                when 'jpg' { 'jpeg' }
+                when 'gd'  { 'gd'   }
+                when 'gd2' { 'gd2'  }
+                when 'gif' { 'gif'  }
+                default    { die "$outfmt is not supported by GD" }
+            };
+
+        my $in_img = do {
+            my $infh = open $in, :r or die "Could not open $in: $!";
+            #binmode IN;
+            GD::Image.$constructor($infh);
+        };
+        $in_img or die "Could not recognize image data in $in";
+
+        my $out_img = GD::Image.new($width, $height)
+            or die "Could not create empty GD image";
+        $out_img.copyResized($in_img, 0, 0, 0, 0,
+                             $width, $height,
+                             $in_img.getBounds);
+#        {
+            my $outfh = open $out, :w or die "Can't write to $out: $!";
+            #binmode OUT;
+#	    my $img = $out_img.$output_meth();
+say $output_meth;
+	    my $Img = "XXX";
+	    $outfh.print($img);
+#        }
+
+        CATCH {
+            warn $@; # if warnings turned on?
+            if (is_in_path("pnmscale")) {
+                my $constructor =
+                    given $infmt {
+                        when 'gif' { 'giftopnm' }
+                        when 'jpg' { 'djpeg'    }
+                        when 'png' { 'pngtopnm' }
+                        when 'xpm' { 'xpmtoppm' }
+                        default    { die "$infmt not supported" }
+                    }
+                    ;
+                my $output =
+                    given $outfmt {
+                        when 'gif' { 'ppmtogif' }
+                        when 'jpg' { 'cjpeg'    }
+                        when 'png' { 'pnmtopng' }
+                        when 'xpm' { 'ppmtoxpm' }
+                        default    { die "$outfmt not supported" }
+                    }
+                    ;
+                system("$constructor $in | " ~
+                       "pnmscale -xsize $args{-width} -ysize $args{-height} | " ~
+                       "$output > $out");
+            }
+        }
+    };
+}

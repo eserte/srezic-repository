@@ -1,0 +1,30 @@
+=head2 is_in_path($prog)
+
+=for category File
+
+Return the pathname of $prog, if the program is in the PATH, or undef
+otherwise.
+
+=cut
+
+sub is_in_path ($prog) {
+    require File::Spec;
+    my $exe_ok = sub ($prog) { -f $prog and -x $prog };
+    return $prog if (file_name_is_absolute($prog) and $exe_ok.($prog));
+    for path() -> $path {
+	if ($?OS eq 'MSWin32') {
+	    my @exts = %ENV.exists('PATHEXT')
+		?? %ENV{'PATHEXT'}.split(';')
+		!! qw(.com .exe .bat .cmd)
+	    ;
+	    for @exts -> $ext {
+	        if $exe_ok.("$path\\$prog$ext") {
+	            return "$path\\$prog";
+		}
+	    }
+	} else {
+	    return "$path/$prog" if $exe_ok.("$path/$prog");
+	}
+    }
+    undef;
+}
