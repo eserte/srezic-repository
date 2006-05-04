@@ -1,7 +1,10 @@
 =head2 unidecode_any($text, $encoding)
 
 Similar to Text::Unidecode::unidecode, but convert to the given
-$encoding.
+$encoding. This will return an octet string in the given I<$encoding>.
+If all you want is just to restrict the charset of the string to a
+specific encoding charset, then it's best to C<Encode::decode> the
+result again with I<$encoding>.
 
 =cut
 
