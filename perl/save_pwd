@@ -1,4 +1,4 @@
-=head2 _save_pwd(sub { ... })
+=head2 save_pwd(sub { ... })
 
 =for category File
 
@@ -7,7 +7,7 @@ directory will still be valid.
 
 =cut
 
-sub _save_pwd (&) {
+sub save_pwd (&) {
     my $code = shift;
     require Cwd;
     my $pwd = Cwd::cwd();
