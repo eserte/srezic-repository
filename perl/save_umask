@@ -1,4 +1,4 @@
-sub _save_umask (&) {
+sub save_umask (&) {
     my $code = shift;
     my $old_umask;
     eval {
