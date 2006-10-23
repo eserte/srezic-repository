@@ -9,7 +9,7 @@ is given.
 
 sub currmem {
     my $pid = shift || $$;
-    if (open(MAP, "dd if=/proc/$pid/map bs=64k |")) { # FreeBSD
+    if (open(MAP, "dd if=/proc/$pid/map bs=64k 2>/dev/null |")) { # FreeBSD
 	my $mem = 0;
 	my $realmem = 0;
 	while(<MAP>) {
