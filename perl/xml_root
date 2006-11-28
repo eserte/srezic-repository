@@ -1,0 +1,21 @@
+=head2 xml_root($file_or_data)
+
+=for category XML
+
+Return the XML document root element (XML::LibXML style) for either
+the given file, or string, if specified as as scalar reference.
+
+=cut
+
+sub xml_root ($) {
+    my($file_or_data) = @_;
+    require XML::LibXML;
+    my $p = XML::LibXML->new;
+    my $doc;
+    if (ref $file_or_data) {
+        $doc = $p->parse_string($$file_or_data);
+    } else {
+	$doc = $p->parse_file($file_or_data);
+    }
+    my $root = $doc->documentElement;
+}
