@@ -5,6 +5,10 @@
 Return ($mem, $realmem) of the current process or process $pid, if $pid
 is given.
 
+On Linux, an even shorter alternative for getting the virtual memory is:
+
+    cat /proc/self/stat | cut -d" " -f 23
+
 =cut
 
 sub currmem {
