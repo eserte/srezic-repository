@@ -41,12 +41,12 @@ XXX DOES NOT WORK YET!
 
 =cut
 
-sub resize_image ($in, $out, $width, $height, ?$infmt, ?$outfmt) {
+sub resize_image ($in, $out, $width, $height, $infmt?, $outfmt?) {
     if !defined $infmt {
-        ($infmt = $in) =~ s{^.*\.([^.]+)$}{$1};
+        ($infmt = $in) =~ s{^.*\.([^.]+)$}={$1};
     }
     if !defined $outfmt {
-        ($outfmt = $out) =~ s{^.*\.([^.]+)$}{$1};
+        ($outfmt = $out) =~ s{^.*\.([^.]+)$}={$1};
     }
     for ($infmt, $outfmt) -> $fmt {
         $fmt = 'jpg' if $fmt eq 'jpeg';
@@ -97,9 +97,9 @@ say $output_meth;
 #        }
 
         CATCH {
-            warn $@; # if warnings turned on?
+            warn $*EVAL_ERROR; # if warnings turned on?
             if (is_in_path("pnmscale")) {
-                my $constructor =
+                my $constructor = do
                     given $infmt {
                         when 'gif' { 'giftopnm' }
                         when 'jpg' { 'djpeg'    }
@@ -108,7 +108,7 @@ say $output_meth;
                         default    { die "$infmt not supported" }
                     }
                     ;
-                my $output =
+                my $output = do
                     given $outfmt {
                         when 'gif' { 'ppmtogif' }
                         when 'jpg' { 'cjpeg'    }
