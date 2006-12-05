@@ -53,6 +53,7 @@ sub resize_image ($in, $out, $width, $height, $infmt?, $outfmt?) {
     }
     try {
         use perl5:GD; # XXX why not require?
+        use perl5:GD::Image; # XXX why this also?
 
         my $constructor = 
             do given $infmt {
