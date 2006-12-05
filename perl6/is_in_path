@@ -15,7 +15,7 @@ sub is_in_path ($prog) {
 	if ($?OS eq 'MSWin32') {
 	    my @exts = %ENV.exists('PATHEXT')
 		?? %ENV{'PATHEXT'}.split(';')
-		!! qw(.com .exe .bat .cmd)
+		!! ('.com', '.exe', '.bat', '.cmd')
 	    ;
 	    for @exts -> $ext {
 	        if $exe_ok.("$path\\$prog$ext") {
