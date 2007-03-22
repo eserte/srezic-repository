@@ -6,7 +6,7 @@
 
 Sleep $s seconds (fractions are allowed). Use this method in Tk
 programs rather than the blocking sleep function. The difference to
-$top->after($s/1000) is that update events are still allowed in the
+$top->after($s/1000) is that refrsh events are still handled in the
 sleeping time.
 
 =cut
