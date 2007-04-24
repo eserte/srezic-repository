@@ -1,7 +1,7 @@
 ;;; -*- emacs-lisp -*-
 
 ;;;
-;;; $Id: repository.el,v 1.1 2004/04/13 23:18:48 eserte Exp $
+;;; $Id: repository.el,v 1.2 2007/04/24 10:50:40 eserte Exp $
 ;;; Author: Slaven Rezic
 ;;;
 ;;; Copyright (C) 2000, 2001 Slaven Rezic. All rights reserved.
@@ -42,7 +42,11 @@
 (defun repository-current-mode ()
   (let ((mode (format "%s" major-mode)))
     (if (= (string-match "^\\(.*\\)-mode$" mode) 0)
-	(substring mode (match-beginning 1) (match-end 1))
+	(progn
+	  (setq mode (substring mode (match-beginning 1) (match-end 1)))
+	  (if (string= mode "cperl")
+	      (setq mode "perl"))
+	  mode)
       nil)))
 
 (defun repository-header ()
