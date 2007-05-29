@@ -16,12 +16,23 @@ sub unidecode_any {
 
     my $res = "";
 
-    for (split //, $text) {
-	my $conv = eval { Encode::encode($encoding, $_, Encode::FB_CROAK()) };
-	if ($@) {
-	    $res .= Text::Unidecode::unidecode($_);
-	} else {
-	    $res .= $conv;
+    if (!eval {
+	Encode->VERSION(2.12); # need v2.12 to support coderef
+	$res = Encode::encode($encoding, $text,
+			      sub {
+				  my $ascii = unidecode(chr $_[0]);
+				  Encode::_utf8_off($ascii);
+				  $ascii;
+			      });
+	1;
+    }) {
+	for (split //, $text) {
+	    my $conv = eval { Encode::encode($encoding, $_, Encode::FB_CROAK()) };
+	    if ($@) {
+		$res .= Text::Unidecode::unidecode($_);
+	    } else {
+		$res .= $conv;
+	    }
 	}
     }
 
