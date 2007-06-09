@@ -2,7 +2,7 @@
 # -*- perl -*-
 
 #
-# $Id: unidecode_any.t,v 1.1 2006/02/01 23:02:47 eserte Exp $
+# $Id: unidecode_any.t,v 1.2 2007/06/09 19:23:58 eserte Exp $
 # Author: Slaven Rezic
 #
 
@@ -29,8 +29,15 @@ do "$FindBin::RealBin/../perl/unidecode_any";
 
 plan tests => 2;
 
-my $x = "\xfc\x{20ac}\N{HORIZONTAL ELLIPSIS}\N{LEFT DOUBLE QUOTATION MARK}";
-is(unidecode_any($x, "iso-8859-1"), q{üEU..."});
-is(unidecode_any($x, "ascii"), q{uEU..."});
+my $x = "" .
+    "\N{LATIN CAPITAL LETTER A WITH DIAERESIS}" .
+    "\N{LATIN SMALL LETTER A WITH DIAERESIS}" .
+    "\N{LATIN CAPITAL LETTER O WITH DIAERESIS}" .
+    "\N{LATIN SMALL LETTER O WITH DIAERESIS}" .
+    "\N{LATIN CAPITAL LETTER U WITH DIAERESIS}" .
+    "\N{LATIN SMALL LETTER U WITH DIAERESIS}" .
+    "\x{20ac}\N{HORIZONTAL ELLIPSIS}\N{LEFT DOUBLE QUOTATION MARK}";
+is(unidecode_any($x, "iso-8859-1"), q{ÄäÖöÜüEU..."});
+is(unidecode_any($x, "ascii"), q{AeaeOeoeUeueEU..."});
 
 __END__

@@ -14,15 +14,31 @@ sub unidecode_any {
     require Text::Unidecode;
     require Encode;
 
+    # provide better conversions for german umlauts
+    my %override = ("\xc4" => "Ae",
+		    "\xd6" => "Oe",
+		    "\xdc" => "Ue",
+		    "\xe4" => "ae",
+		    "\xf6" => "oe",
+		    "\xfc" => "ue",
+		   );
+    my $override_rx = "(" . join("|", map { quotemeta } keys %override) . ")";
+    $override_rx = qr{$override_rx};
+
     my $res = "";
 
     if (!eval {
 	Encode->VERSION(2.12); # need v2.12 to support coderef
 	$res = Encode::encode($encoding, $text,
 			      sub {
-				  my $ascii = unidecode(chr $_[0]);
-				  Encode::_utf8_off($ascii);
-				  $ascii;
+				  my $ch = chr $_[0];
+				  if ($ch =~ $override_rx) {
+				      return $override{$ch};
+				  } else {
+				      my $ascii = unidecode($ch);
+				      Encode::_utf8_off($ascii);
+				      $ascii;
+				  }
 			      });
 	1;
     }) {
