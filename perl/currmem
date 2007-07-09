@@ -13,7 +13,7 @@ On Linux, an even shorter alternative for getting the virtual memory is:
 
 sub currmem {
     my $pid = shift || $$;
-    if (open(MAP, "dd if=/proc/$pid/map bs=64k 2>/dev/null |")) { # FreeBSD
+    if ($^O eq 'freebsd' && open(MAP, "dd if=/proc/$pid/map bs=64k 2>/dev/null |")) { # FreeBSD
 	my $mem = 0;
 	my $realmem = 0;
 	while(<MAP>) {
@@ -26,7 +26,7 @@ sub currmem {
 	}
 	close MAP;
 	($mem, $realmem);
-    } elsif (open(MAP, "/proc/$pid/maps")) { # Linux
+    } elsif ($^O eq 'linux' && open(MAP, "/proc/$pid/maps")) { # Linux
 	my $mem = 0;
 	my $realmem = 0;
 	while(<MAP>) {
