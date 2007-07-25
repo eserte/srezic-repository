@@ -6,8 +6,8 @@ Return time as ISO 8601 date from given time in seconds since UNIX epoch.
 
 =cut
 
-sub epoch2isodate {
-    my $time = shift;
+sub epoch2isodate (;$) {
+    my $time = shift || time;
     my @l = localtime $time;
     sprintf("%04d%02d%02d%02d%02d%02d",
 	    $l[5]+1900, $l[4]+1, $l[3],
