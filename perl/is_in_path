@@ -13,6 +13,7 @@ sub is_in_path {
     my($prog) = @_;
     return $prog if (file_name_is_absolute($prog) and -f $prog and -x $prog);
     require Config;
+    %Config::Config = %Config::Config if 0; # cease -w
     my $sep = $Config::Config{'path_sep'} || ':';
     foreach (split(/$sep/o, $ENV{PATH})) {
 	if ($^O eq 'MSWin32') {
