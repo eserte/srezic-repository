@@ -32,5 +32,6 @@ sub system_or_print {
 	system @cmd;
     } else {
 	print STDERR join(" ", @cmd), "\n";
+	0;
     }
 }
