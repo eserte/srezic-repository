@@ -13,6 +13,7 @@ On Linux, an even shorter alternative for getting the virtual memory is:
 
 sub currmem {
     my $pid = shift || $$;
+    no warnings 'portable'; # because of possible large hex values on 64bit systems
     if ($^O eq 'freebsd' && open(MAP, "dd if=/proc/$pid/map bs=64k 2>/dev/null |")) { # FreeBSD
 	my $mem = 0;
 	my $realmem = 0;
