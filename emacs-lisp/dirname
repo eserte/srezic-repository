@@ -1,0 +1,8 @@
+(defun XXX-dirname (path)
+  "Return the dirname of the path (like the Unix tool dirname)."
+  (if (string-match "^/[^/]*$" path)
+      "/"
+    (if (string-match "^\\(.*\\)/[^/]*$" path)
+	(substring path 0 (match-end 1))
+      nil)
+    ))
