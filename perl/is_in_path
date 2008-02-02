@@ -11,7 +11,18 @@ DEPENDENCY: file_name_is_absolute
 
 sub is_in_path {
     my($prog) = @_;
-    return $prog if (file_name_is_absolute($prog) and -f $prog and -x $prog);
+    if (file_name_is_absolute($prog)) {
+	if ($^O eq 'MSWin32') {
+	    return $prog
+		if ((-f $prog && -x $prog) ||
+		    (-f "$prog.bat" && -x "$prog.bat") ||
+		    (-f "$prog.com" && -x "$prog.com") ||
+		    (-f "$prog.exe" && -x "$prog.exe") ||
+		    (-f "$prog.cmd" && -x "$prog.cmd"));
+	} else {
+	    return $prog if -f $prog and -x $prog;
+	}
+    }
     require Config;
     %Config::Config = %Config::Config if 0; # cease -w
     my $sep = $Config::Config{'path_sep'} || ':';
