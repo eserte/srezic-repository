@@ -13,12 +13,11 @@ sub is_in_path {
     my($prog) = @_;
     if (file_name_is_absolute($prog)) {
 	if ($^O eq 'MSWin32') {
-	    return $prog
-		if ((-f $prog && -x $prog) ||
-		    (-f "$prog.bat" && -x "$prog.bat") ||
-		    (-f "$prog.com" && -x "$prog.com") ||
-		    (-f "$prog.exe" && -x "$prog.exe") ||
-		    (-f "$prog.cmd" && -x "$prog.cmd"));
+	    return $prog       if (-f $prog && -x $prog);
+	    return "$prog.bat" if (-f "$prog.bat" && -x "$prog.bat");
+	    return "$prog.com" if (-f "$prog.com" && -x "$prog.com");
+	    return "$prog.exe" if (-f "$prog.exe" && -x "$prog.exe");
+	    return "$prog.cmd" if (-f "$prog.cmd" && -x "$prog.cmd");
 	} else {
 	    return $prog if -f $prog and -x $prog;
 	}
@@ -29,11 +28,11 @@ sub is_in_path {
     foreach (split(/$sep/o, $ENV{PATH})) {
 	if ($^O eq 'MSWin32') {
 	    # maybe use $ENV{PATHEXT} like maybe_command in ExtUtils/MM_Win32.pm?
-	    return "$_\\$prog"
-		if (-x "$_\\$prog.bat" ||
-		    -x "$_\\$prog.com" ||
-		    -x "$_\\$prog.exe" ||
-		    -x "$_\\$prog.cmd");
+	    return "$_\\$prog"     if (-f "$_\\$prog" && -x "$_\\$prog");
+	    return "$_\\$prog.bat" if (-f "$_\\$prog.bat" && -x "$_\\$prog.bat");
+	    return "$_\\$prog.com" if (-f "$_\\$prog.com" && -x "$_\\$prog.com");
+	    return "$_\\$prog.exe" if (-f "$_\\$prog.exe" && -x "$_\\$prog.exe");
+	    return "$_\\$prog.cmd" if (-f "$_\\$prog.cmd" && -x "$_\\$prog.cmd");
 	} else {
 	    return "$_/$prog" if (-x "$_/$prog" && !-d "$_/$prog");
 	}
