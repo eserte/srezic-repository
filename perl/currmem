@@ -7,7 +7,7 @@ is given.
 
 On Linux, an even shorter alternative for getting the virtual memory is:
 
-    cat /proc/self/stat | cut -d" " -f 23
+    cat /proc/$$/stat | cut -d" " -f 23
 
 =cut
 
