@@ -4,6 +4,12 @@
 
 Return content of the file I<$file>. Die if the file is not readable.
 
+An alternative implementation would be
+
+    sub slurp ($) { open my $fh, shift or die $!; local $/; <$fh> }
+
+but this probably won't work with very old perls.
+
 =cut
 
 sub slurp ($) {
