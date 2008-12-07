@@ -13,7 +13,7 @@ sub is_interactive {
     }
 
     # from perlfaq8
-    open(TTY, "/dev/tty") or die $!;
+    open(TTY, "/dev/tty") or return 0;
     my $tpgrp = POSIX::tcgetpgrp(fileno(*TTY));
     my $pgrp = getpgrp();
     if ($tpgrp == $pgrp) {
