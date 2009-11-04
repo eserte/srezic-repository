@@ -15,9 +15,21 @@ Recommendation: also use
 sub confirmed_cmd (&;$) {
     my($code, $label) = @_;
     require B::Deparse;
-    $label = B::Deparse->new->coderef2text($code)
-	if !defined $label;
-    $label =~ s{^\s*use strict 'refs';\s*\n}{}m;
+    if (!defined $label) {
+	my $pad_defs = "# cannot get lexicals, no PadWalker installed\n";
+	if (eval { require PadWalker; require Data::Dumper; 1 }) {
+	    my $list = PadWalker::closed_over($code);
+	    my @pad_defs;
+	    while(my($k,$v) = each %$list) {
+		push @pad_defs, Data::Dumper->new([$$v],[$k])->Indent(1)->Useqq(1)->Dump;
+	    }
+	    $pad_defs = @pad_defs ? "\n" . join("", map { "    $_" } @pad_defs) : '';
+	    $pad_defs =~ s{\n$}{};
+	}
+	$label = B::Deparse->new->coderef2text($code);
+	$label =~ s{^\s*use strict 'refs';\s*\n}{}m;
+	$label =~ s<^{><{$pad_defs>;
+    }
     print STDERR "CALL $label ";
     <STDIN>;
     $code->();
