@@ -1,10 +1,23 @@
-=head2 confirmed_cmd($code, $label)
+=head2 confirmed_cmd($code, %opts)
 
 =for category System
 
-Wait for user confirmation, then execute the given code reference. The
-source code of the code reference is presented to the user, unless the
-option $label is given.
+Wait for user confirmation, then execute the given code reference. Options:
+
+=over
+
+=item label => "..."
+
+By default the source code of the code reference is presented to the
+user, which can be overwritten with the label option.
+
+=item cont_with => "..."
+
+Usually the user needs only to hit "Return" to continu execution. With
+this option the user is required to type exactly the value of
+"cont_with".
+
+=back
 
 Recommendation: also use
 
@@ -12,9 +25,12 @@ Recommendation: also use
 
 =cut
 
-sub confirmed_cmd (&;$) {
-    my($code, $label) = @_;
-    require B::Deparse;
+sub confirmed_cmd (&;@) {
+    my($code, %opt) = @_;
+    my $label = delete $opt{label};
+    my $cont_with = delete $opt{cont_with};
+    die "Unhandled options: " . join(" ", %opt) if %opt;
+
     if (!defined $label) {
 	my $pad_defs = "# cannot get lexicals, no PadWalker installed\n";
 	if (eval { require PadWalker; require Data::Dumper; 1 }) {
@@ -32,11 +48,21 @@ sub confirmed_cmd (&;$) {
 	    $pad_defs = @pad_defs ? "\n" . join("", map { "    $_" } @pad_defs) : '';
 	    $pad_defs =~ s{\n$}{};
 	}
+	require B::Deparse;
 	$label = B::Deparse->new->coderef2text($code);
 	$label =~ s{^\s*use strict 'refs';\s*\n}{}m;
 	$label =~ s<^{><{$pad_defs>;
     }
     print STDERR "CALL $label ";
-    <STDIN>;
+    if (defined $cont_with && $cont_with ne '') {
+	print STDERR "(continue with '$cont_with') ";
+	while () {
+	    chomp(my $yn = <STDIN>);
+	    last if ($yn eq $cont_with);
+	    print STDERR "*** Please type '$cont_with' to continue ";
+	}
+    } else {
+	<STDIN>;
+    }
     $code->();
 }
