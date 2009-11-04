@@ -17,6 +17,7 @@ sub confirmed_cmd (&;$) {
     require B::Deparse;
     $label = B::Deparse->new->coderef2text($code)
 	if !defined $label;
+    $label =~ s{^\s*use strict 'refs';\s*\n}{}m;
     print STDERR "CALL $label ";
     <STDIN>;
     $code->();
