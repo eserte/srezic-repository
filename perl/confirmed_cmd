@@ -1,0 +1,23 @@
+=head2 confirmed_cmd($code, $label)
+
+=for category System
+
+Wait for user confirmation, then execute the given code reference. The
+source code of the code reference is presented to the user, unless the
+option $label is given.
+
+Recommendation: also use
+
+    use autodie qw(:default :system);
+
+=cut
+
+sub confirmed_cmd (&;$) {
+    my($code, $label) = @_;
+    require B::Deparse;
+    $label = B::Deparse->new->coderef2text($code)
+	if !defined $label;
+    print STDERR "CALL $label ";
+    <STDIN>;
+    $code->();
+}
