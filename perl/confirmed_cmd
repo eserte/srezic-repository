@@ -21,7 +21,13 @@ sub confirmed_cmd (&;$) {
 	    my $list = PadWalker::closed_over($code);
 	    my @pad_defs;
 	    while(my($k,$v) = each %$list) {
-		push @pad_defs, Data::Dumper->new([$$v],[$k])->Indent(1)->Useqq(1)->Dump;
+		my $do_deref = ref($v) =~ m{^(SCALAR|REF)$};
+		my $deref = $do_deref ? $$v : $v;
+		my $dump = Data::Dumper->new([$deref],[ (!$do_deref ? '*' : '') . 'a'])->Indent(1)->Useqq(1)->Dump;
+		$dump =~ s{^.a\s*=\s*}{};
+		my @dump = split /\n/, $dump;
+		s{^}{    } for @dump[1..$#dump];
+		push @pad_defs, "$k = " . join("\n", @dump);
 	    }
 	    $pad_defs = @pad_defs ? "\n" . join("", map { "    $_" } @pad_defs) : '';
 	    $pad_defs =~ s{\n$}{};
