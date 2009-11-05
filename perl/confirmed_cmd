@@ -39,11 +39,14 @@ sub confirmed_cmd (&;@) {
 	    while(my($k,$v) = each %$list) {
 		my $do_deref = ref($v) =~ m{^(SCALAR|REF)$};
 		my $deref = $do_deref ? $$v : $v;
-		my $dump = Data::Dumper->new([$deref],[ (!$do_deref ? '*' : '') . 'a'])->Indent(1)->Useqq(1)->Dump;
+		my $dump = Data::Dumper->new([$deref],[ (!$do_deref ? '*' : '') . 'a'])->Indent(0)->Useqq(1)->Dump;
+		if (length $dump > 60) {
+		    $dump = substr($dump, 0, 60) . '...';
+		}
 		$dump =~ s{^.a\s*=\s*}{};
 		my @dump = split /\n/, $dump;
 		s{^}{    } for @dump[1..$#dump];
-		push @pad_defs, "$k = " . join("\n", @dump);
+		push @pad_defs, "my $k = " . join("\n", @dump);
 	    }
 	    $pad_defs = @pad_defs ? "\n" . join("", map { "    $_" } @pad_defs) : '';
 	    $pad_defs =~ s{\n$}{};
