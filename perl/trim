@@ -12,6 +12,6 @@ sub trim ($) {
     return $s if !defined $s;
     $s =~ s/^\s+//;
     $s =~ s/\s+$//;
-    $s =~ s/\s+/ /;
+    $s =~ s/\s+/ /g;
     $s;
 }
