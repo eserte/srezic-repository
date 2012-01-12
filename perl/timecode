@@ -2,18 +2,30 @@
 
 =for category Benchmark
 
-Times a piece of code.
+Benchmark a piece of code.
 
 =cut
 
 sub timecode (&) {
     my $code = shift;
-    my $begin = Tk::timeofday();
-    if (ref $code eq 'CODE') {
-	$code->();
+    require Time::HiRes;
+    my @res;
+    my $res;
+    my $begin = Time::HiRes::time();
+    if (wantarray) {
+	if (ref $code eq 'CODE') {
+	    @res = $code->();
+	} else {
+	    @res = eval $code; warn $@ if $@;
+	}
     } else {
-	eval $code; warn $@ if $@;
+	if (ref $code eq 'CODE') {
+	    $res = $code->();
+	} else {
+	    $res = eval $code; warn $@ if $@;
+	}
     }
-    my $end   = Tk::timeofday();
+    my $end   = Time::HiRes::time();
     print STDERR ($end - $begin) . " s\n";
+    wantarray ? @res : $res;
 }
