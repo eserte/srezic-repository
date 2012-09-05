@@ -1,0 +1,22 @@
+=head2 save_pwd2
+
+=for category File
+
+Save the current directory and restore it until the remembered object
+gets out of scope.
+
+=cut
+
+{
+    sub save_pwd2 {
+	require Cwd;
+	bless {cwd => Cwd::cwd()}, __PACKAGE__ . '::SavePwd2';
+    }
+    my $DESTROY = sub {
+	my $self = shift;
+	chdir $self->{cwd}
+	    or die "Can't chdir to $self->{cwd}: $!";
+    };
+    no strict 'refs';
+    *{__PACKAGE__.'::SavePwd2::DESTROY'} = $DESTROY;
+}
