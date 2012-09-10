@@ -1,0 +1,24 @@
+=head2 guarded_mkpath
+
+=for category Commands::Guarded
+
+A mkpath for Commands::Guarded
+
+=cut
+
+sub guarded_mkpath ($;$) {
+    my($filename, $mask) = @_;
+    my $msg = "mkpath $filename";
+    if (defined $mask) {
+	$msg .= " with mask $mask";
+    }
+    step $msg =>
+        ensure { -d $filename }
+	using {
+	    require File::Path;
+	    # XXX verbose, yes or no?
+	    # XXX $ENV{GUARDED_VERBOSE} value? The verbose() subroutine?
+	    File::Path::mkpath($filename, 1, $mask);
+	}
+    ;
+}

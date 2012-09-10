@@ -1,0 +1,16 @@
+=head2 guarded_symlink
+
+=for category Commands::Guarded
+
+A symlink for Commands::Guarded
+
+=cut
+
+sub guarded_symlink ($$) {
+    my($oldfile, $newfile) = @_;
+    my $msg = "symlink $newfile -> $oldfile";
+    step $msg =>
+        ensure { readlink $newfile eq $oldfile }
+	using  { symlink $oldfile, $newfile }
+    ;
+}

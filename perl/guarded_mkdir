@@ -1,0 +1,25 @@
+=head2 guarded_mkdir
+
+=for category Commands::Guarded
+
+A mkdir for Commands::Guarded
+
+=cut
+
+sub guarded_mkdir ($;$) {
+    my($filename, $mask) = @_;
+    my $msg = "mkdir $filename";
+    if (defined $mask) {
+	$msg .= " with mask $mask";
+    }
+    step $msg =>
+        ensure { -d $filename }
+	using {
+	    if (defined $mask) {
+		mkdir $filename, $mask;
+	    } else {
+		mkdir $filename;
+	    }
+	}
+    ;
+}
