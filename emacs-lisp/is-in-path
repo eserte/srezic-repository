@@ -8,7 +8,7 @@ the complete pathname to the program."
     (while (and path
 		(not found))
       (setq dir (car path))
-      (setq currpath (concat dir (char-to-string directory-sep-char) prog))
+      (setq currpath (concat dir "/" prog))
       (if (and (file-exists-p currpath)
 	       (file-executable-p currpath))
 	  (setq found currpath))

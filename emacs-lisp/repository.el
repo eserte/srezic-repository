@@ -1,7 +1,7 @@
 ;;; -*- emacs-lisp -*-
 
 ;;;
-;;; $Id: repository.el,v 1.2 2007/04/24 10:50:40 eserte Exp $
+;;; $Id: repository.el,v 1.3 2013/02/08 07:13:22 eserte Exp $
 ;;; Author: Slaven Rezic
 ;;;
 ;;; Copyright (C) 2000, 2001 Slaven Rezic. All rights reserved.
@@ -193,7 +193,7 @@ the complete pathname to the program."
     (while (and path
 		(not found))
       (setq dir (car path))
-      (setq currpath (concat dir (char-to-string directory-sep-char) prog))
+      (setq currpath (concat dir "/" prog))
       (if (and (file-exists-p currpath)
 	       (file-executable-p currpath))
 	  (setq found currpath))
