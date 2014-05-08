@@ -7,7 +7,7 @@ gets out of scope.
 
 =cut
 
-{
+BEGIN {
     sub save_pwd2 {
 	require Cwd;
 	bless {cwd => Cwd::cwd()}, __PACKAGE__ . '::SavePwd2';
