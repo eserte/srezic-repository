@@ -35,7 +35,7 @@ sub currmem {
 	    my($start,$end) = split /-/, $l[0];
 	    my $delta = (hex($end)-hex($start));
 	    $mem += $delta;
-	    if (!defined $l[5] || $l[5] eq '') {
+	    if (!defined $l[5] || $l[5] eq '' || $l[5] eq '[heap]') {
 		$realmem += $delta;
 	    }
 	}
