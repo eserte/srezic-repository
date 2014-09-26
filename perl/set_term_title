@@ -1,0 +1,28 @@
+=item set_term_title($string)
+
+Change the terminal using L<XTerm::Conf> or L<Term::Title>. Do nothing
+if setting the title is not possible.
+
+=cut
+
+sub set_term_title {
+    my $string = shift;
+    our $set_term_title_checked;
+    if (defined $set_term_title_checked) {
+	return if !$set_term_title_checked;
+    } else {
+	if (!eval { require XTerm::Conf; 1 }) {
+	    if (!eval { require Term::Title; 1 }) {
+		$set_term_title_checked = 0;
+		return;
+	    }
+	}
+	$set_term_title_checked = 1;
+    }
+
+    if (defined &XTerm::Conf::xterm_conf_string) {
+	print STDERR XTerm::Conf::xterm_conf_string(-title => $string);
+    } else {
+	Term::Title::set_titlebar($string);
+    }
+}
