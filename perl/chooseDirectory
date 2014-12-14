@@ -16,7 +16,7 @@ if (!Tk::Widget->can("chooseDirectory")) {
     my $curr_dir = $args{-initialdir};
     if (!defined $curr_dir) {
 	require Cwd;
-	$curr_dir = Cwd::cwd();
+	$curr_dir = Cwd::getcwd();
     }
     if (defined $args{-mustexist}) {
 	die "-mustexist is not yet implemented";
