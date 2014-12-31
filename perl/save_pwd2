@@ -10,12 +10,18 @@ gets out of scope.
 BEGIN {
     sub save_pwd2 {
 	require Cwd;
-	bless {cwd => Cwd::getcwd()}, __PACKAGE__ . '::SavePwd2';
+	my $pwd = Cwd::getcwd();
+	if (!defined $pwd) {
+	    warn "No known current working directory";
+	}
+	bless {cwd => $pwd}, __PACKAGE__ . '::SavePwd2';
     }
     my $DESTROY = sub {
 	my $self = shift;
-	chdir $self->{cwd}
-	    or die "Can't chdir to $self->{cwd}: $!";
+	if (defined $self->{cwd}) {
+	    chdir $self->{cwd}
+	        or die "Can't chdir to $self->{cwd}: $!";
+	}
     };
     no strict 'refs';
     *{__PACKAGE__.'::SavePwd2::DESTROY'} = $DESTROY;
