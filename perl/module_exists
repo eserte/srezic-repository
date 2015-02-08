@@ -1,6 +1,6 @@
 =head2 module_exists($module)
 
-Return true if the module exists in @INC
+Return true if the module exists in @INC or if it is already loaded.
 
 =cut
 
