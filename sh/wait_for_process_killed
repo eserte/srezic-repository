@@ -1,24 +1,52 @@
-# Parameters:
-# - process id (mandatory)
-# - timeout (optional, defaults to 20s)
-# Kills with signal 9.
-# The checks for process existence are done every second
-# except on linux systems where it's every 0.1s.
+# Options
+# -t timeout: maximum time in seconds to wait for the killed process
+# -s signum: signal number or name to be used, by default 9 (KILL)
+# -S step:    step between checks in seconds. On Linux by default 0.1s,
+#             on other systems 1s (as floating point sleep is not
+#             possible everywhere)
+# Mandatory parameters are one or more process ids.
+#
 wait_for_process_killed () {
-    local pid=$1
-    local timeout=$2
-    if [ -z $timeout ]; then timeout=20; fi;
     local step=1
     if [ "$OSTYPE" = "linux-gnu" ]; then step=0.1; fi
     local killsig=9
+    local timeout=20
+    local pids
+    
+    while getopts ":t:s:S:" opt; do
+        case $opt in
+            t)
+                timeout=$OPTARG
+                ;;
+            s)
+                killsig=$OPTARG
+                ;;
+            S)
+                step=$OPTARG
+                ;;
+            :)
+#echo "<$OPTARG>"
+#                if [ -z "$pids" ]; then pids=$OPTARG; else pids="$pids $OPTARG"; fi
+                ;;
+            *)
+                echo "usage: wait_for_process_killed [-t timeout] [-s signum] [-S checkstep] pid ..." >&2
+                return 1
+                ;;
+        esac
+    done
+    shift $((OPTIND-1))
+    local pids="$*"
 
-    kill -$killsig $pid;
-    while kill -0 $pid 2>/dev/null
-    do
+    if [ -z $pids ]; then
+        echo "Please specify one or more process ids to kill" >&2
+        return 1
+    fi
+
+    kill -$killsig $(echo $pids);
+    while kill -0 $(echo $pids) 2>/dev/null; do
         timeout=$((timeout-step))
-        if [[ $timeout -le 0 ]]
-        then
-            echo "Process $pid still runs, cannot kill it"
+        if [ $timeout -le 0 ]; then
+            echo "Process(es) $pids still run(s), cannot kill it" >&2
             return 1
         fi
         sleep $step
