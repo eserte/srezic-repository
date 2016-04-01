@@ -1,6 +1,9 @@
+# Kill processes and wait until they are really killed.
+#
 # Options
-# -t timeout: maximum time in seconds to wait for the killed process
-# -s signum: signal number or name to be used, by default 9 (KILL)
+# -t timeout: maximum time in seconds to wait for the killed process,
+#             default is 20s
+# -s signum:  signal number or name to be used, by default 9 (KILL)
 # -S step:    step between checks in seconds. On Linux by default 0.1s,
 #             on other systems 1s (as floating point sleep is not
 #             possible everywhere)
