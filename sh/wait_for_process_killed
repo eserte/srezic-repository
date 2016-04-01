@@ -15,8 +15,10 @@ wait_for_process_killed () {
     local killsig=9
     local timeout=20
     local pids
+    local dryrun=0
+    local debug=0
     
-    while getopts ":t:s:S:" opt; do
+    while getopts ":t:s:S:nd" opt; do
         case $opt in
             t)
                 timeout=$OPTARG
@@ -27,12 +29,16 @@ wait_for_process_killed () {
             S)
                 step=$OPTARG
                 ;;
+            n)
+                dryrun=1
+                ;;
+            d)
+                debug=1
+                ;;
             :)
-#echo "<$OPTARG>"
-#                if [ -z "$pids" ]; then pids=$OPTARG; else pids="$pids $OPTARG"; fi
                 ;;
             *)
-                echo "usage: wait_for_process_killed [-t timeout] [-s signum] [-S checkstep] pid ..." >&2
+                echo "usage: wait_for_process_killed [-n] [-t timeout] [-s signum] [-S checkstep] pid ..." >&2
                 return 1
                 ;;
         esac
@@ -40,19 +46,48 @@ wait_for_process_killed () {
     shift $((OPTIND-1))
     local pids="$*"
 
-    if [ -z $pids ]; then
+    if [ -z "$pids" ]; then
         echo "Please specify one or more process ids to kill" >&2
         return 1
     fi
+    if [ $debug = 1 ]; then
+        echo "Process ids to kill: $pids" >&2
+    fi
 
-    kill -$killsig $(echo $pids);
+    case $dryrun in
+        1) echo "Would run kill -$killsig $(echo $pids)" >&2 ;;
+        0)                 kill -$killsig $(echo $pids);;
+    esac
+
     while kill -0 $(echo $pids) 2>/dev/null; do
-        timeout=$((timeout-step))
-        if [ $timeout -le 0 ]; then
-            echo "Process(es) $pids still run(s), cannot kill it" >&2
-            return 1
+        # Math is hard in POSIX shell. zsh can
+        # handle floats in $((...)), but bash and sh do not.
+        # One possibility is to fallback to bc, but it seems that
+        # perl is likelier to be installed than bc. Go with perl,
+        # even if it's slightly slower than bc (4ms vs. 2ms or so).
+        case $step in
+            *.*)
+                timeout=$(perl -e 'print shift()-shift()' $timeout $step)
+                ;;
+            *)
+                timeout=$((timeout-step))
+                ;;
+        esac
+        # Straightforward would be [ $timeout -le 0 ]
+        # but $timeout might be a float... 
+        case $timeout in
+            0 | -*)
+                echo "Process(es) $pids still run(s), cannot kill it" >&2
+                return 1
+                ;;
+        esac
+        if [ $debug = 1 ]; then
+            echo "Sleep $step (timeout left is $timeout)" >&2
         fi
         sleep $step
     done
+    if [ $debug = 1 ]; then
+        echo "Process(es) do(es) not exist anymore" >&2
+    fi
     return 0
 }
