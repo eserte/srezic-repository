@@ -62,8 +62,13 @@ sub confirmed_cmd (&;@) {
     }
     print STDERR "CALL $label ";
  CONFIRMATION: {
-	no warnings 'once';
-	last CONFIRMATION if $confirmed_cmd::batch;
+	{
+	    no warnings 'once';
+	    if ($confirmed_cmd::batch) {
+		print STDERR "\n";
+		last CONFIRMATION;
+	    }
+	}
 
 	if (defined $cont_with && $cont_with ne '') {
 	    print STDERR "(continue with '$cont_with') ";
