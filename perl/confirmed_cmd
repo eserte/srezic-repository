@@ -23,6 +23,9 @@ Recommendation: also use
 
     use autodie qw(:default :system);
 
+If the global variable C<$confirmed_cmd::batch> is set to a true
+value, then all confirmation questions are skipped.
+
 =cut
 
 sub confirmed_cmd (&;@) {
@@ -48,24 +51,30 @@ sub confirmed_cmd (&;@) {
 		s{^}{    } for @dump[1..$#dump];
 		push @pad_defs, "my $k = " . join("\n", @dump);
 	    }
-	    $pad_defs = @pad_defs ? "\n" . join("", map { "    $_" } @pad_defs) : '';
+	    $pad_defs = @pad_defs ? "\n" . join("\n", map { "    $_" } @pad_defs) : '';
 	    $pad_defs =~ s{\n$}{};
 	}
 	require B::Deparse;
 	$label = B::Deparse->new->coderef2text($code);
+	$label =~ s<^\s*BEGIN\s*\{(\s*\$\^H\{[^;]+;)+\s*\}><>m;
 	$label =~ s{^\s*use strict 'refs';\s*\n}{}m;
 	$label =~ s<^{><{$pad_defs>;
     }
     print STDERR "CALL $label ";
-    if (defined $cont_with && $cont_with ne '') {
-	print STDERR "(continue with '$cont_with') ";
-	while () {
-	    chomp(my $yn = <STDIN>);
-	    last if ($yn eq $cont_with);
-	    print STDERR "*** Please type '$cont_with' to continue ";
+ CONFIRMATION: {
+	no warnings 'once';
+	last CONFIRMATION if $confirmed_cmd::batch;
+
+	if (defined $cont_with && $cont_with ne '') {
+	    print STDERR "(continue with '$cont_with') ";
+	    while () {
+		chomp(my $yn = <STDIN>);
+		last if ($yn eq $cont_with);
+		print STDERR "*** Please type '$cont_with' to continue ";
+	    }
+	} else {
+	    <STDIN>;
 	}
-    } else {
-	<STDIN>;
     }
     $code->();
 }
