@@ -17,7 +17,7 @@ sub sort_by_ordered_array {
     {
 	my $i = 0;
 	if ($args{atend}) {
-	    %sort_order = map { ($_ => ++$i) } reverse @$ordered_array;
+	    %sort_order = map { ($_ => ++$i) }         @$ordered_array;
 	} else {
 	    %sort_order = map { ($_ => --$i) } reverse @$ordered_array;
 	}
