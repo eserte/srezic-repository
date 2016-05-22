@@ -1,0 +1,22 @@
+=head2 sort_by_example($samples_array_ref, @list)
+
+Sort by a given example. Values not specified in the examples are
+sorted to the end, alphanummerically.
+
+See also L<Sort::ByExample>.
+
+=cut
+
+sub sort_by_example ($@) {
+    my $example_ref = shift;
+    my %score = do {
+	my $score = 1;
+	map { ($_ => $score++) } reverse @$example_ref;
+    };
+    no warnings "uninitialized";
+    sort {
+	my $score_a = $score{$a};
+	my $score_b = $score{$b};
+	!defined $score_a && !defined $score_b ? $a cmp $b : $score{$b} <=> $score{$a};
+    } @_;
+}
