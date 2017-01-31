@@ -1,0 +1,52 @@
+=head2 exists_by_dot_notation
+
+=head2 get_by_dot_notation
+
+=for category Hash
+
+Deal with nested hashes in dot notation.
+
+    my $existence = exists_by_dot_notation($hashref, 'foo.bar.baz');
+    my $value     = get_by_dot_notation($hashref, 'foo.bar.baz');
+    my $value     = set_by_dot_notation($hashref, 'foo.bar.baz', $new_value); # with auto-vivification
+
+=cut
+
+
+sub exists_by_dot_notation {
+    my($hashref, $path) = @_;
+    if (my($head, $tail) = $path =~ m{^([^.]+)(?:\.(.+))?$}) {
+        return if !exists $hashref->{$head};
+        return 1 if !defined $tail;
+        return exists_by_dot_notation($hashref->{$head}, $tail);
+    } else {
+        die "FATAL ERROR (should never happen): can't parse path '$path'";
+    }
+}
+
+sub get_by_dot_notation {
+    my($hashref, $path) = @_;
+    if (my($head, $tail) = $path =~ m{^([^.]+)(?:\.(.*))?$}) {
+        return if !exists $hashref->{$head};
+        return $hashref->{$head} if !defined $tail;
+        return get_by_dot_notation($hashref->{$head}, $tail);
+    } else {
+        die "FATAL ERROR (should never happen): can't parse path '$path'";
+    }
+}
+
+sub set_by_dot_notation {
+    my($hashref, $path, $new_value) = @_;
+    if (my($head, $tail) = $path =~ m{^([^.]+)(?:\.(.*))?$}) {
+	if (!defined $tail) {
+	    return $hashref->{$head} = $new_value;
+	} else {
+	    if (ref $hashref->{$head} ne 'HASH') {
+		$hashref->{$head} = {}; # may overwrite an existing value
+	    }
+	    return set_by_dot_notation($hashref->{$head}, $tail, $new_value);
+	}
+    } else {
+        die "FATAL ERROR (should never happen): can't parse path '$path'";
+    }
+}
