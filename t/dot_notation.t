@@ -39,6 +39,16 @@ plan 'no_plan';
 }
 
 {
+    my %flat = (abc => 1, def => 2);
+
+    ok  exists_by_dot_notation(\%flat, 'abc');
+    ok !exists_by_dot_notation(\%flat, 'xyz');
+
+    is get_by_dot_notation(\%flat, 'abc'), 1;
+    is get_by_dot_notation(\%flat, 'xyz'), undef;
+}
+
+{
     my $deep = { foo => { bar => { baz => 4711 } } };
     is set_by_dot_notation($deep, 'foo.bar.baz', 3.14), 3.14;
     is $deep->{foo}->{bar}->{baz}, 3.14;
