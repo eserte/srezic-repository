@@ -3,11 +3,20 @@
 Accept user input. Return true on 'y', return false on 'n', otherwise
 ask again.
 
+A default may be supplied as an optional argument:
+
+    y_or_n 'y';
+    y_or_n 'n';
+
 =cut
 
-sub y_or_n () {
+sub y_or_n (;$) {
+    my $default = shift;
     while () {
         chomp(my $yn = <STDIN>);
+	if ($yn eq '' && defined $default) {
+	    $yn = $default;
+	}
         if (lc $yn eq 'y') {
             return 1;
         } elsif (lc $yn eq 'n') {
