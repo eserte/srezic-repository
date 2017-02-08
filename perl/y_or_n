@@ -1,0 +1,19 @@
+=head2 y_or_n
+
+Accept user input. Return true on 'y', return false on 'n', otherwise
+ask again.
+
+=cut
+
+sub y_or_n () {
+    while () {
+        chomp(my $yn = <STDIN>);
+        if (lc $yn eq 'y') {
+            return 1;
+        } elsif (lc $yn eq 'n') {
+	    return 0;
+        } else {
+            print STDERR "Please answer y or n: ";
+        }
+    }
+}
