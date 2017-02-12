@@ -4,6 +4,7 @@ matrix:
   include:
 # First five
     - perl: "5.22"
+      env: WITH_ALL_DEPS=1
     - perl: "5.20"
     - perl: "5.18"
     - perl: "5.16"
@@ -14,6 +15,7 @@ matrix:
     - perl: "5.12"
     - perl: "5.10"
     - perl: "5.8"
+      env: WITH_ALL_DEPS=1
     # Actually the perl here does not matter
     - perl: "5.14"
       env: USE_SYSTEM_PERL=1
@@ -32,6 +34,7 @@ install:
  #
  # On Linux run the normal travis-ci install command.
  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then cpanm --quiet --installdeps --notest .; fi
+ - if [ "$WITH_ALL_DEPS" = "1" ]; then cpanm --quiet --notest Date::Manip IPC::Run Tk Text::Unidecode XML::LibXML; fi
 
 script:
  - perl Makefile.PL && env HARNESS_TIMER=1 make test
