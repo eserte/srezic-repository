@@ -12,12 +12,12 @@ use FindBin;
 BEGIN {
     if (!eval q{
 	use Test::More;
-	use Text::Unidecode;
+	use Text::Unidecode 1.01; # changed EU -> EUR
 	use Encode;
 	use charnames qw(:full);
 	1;
     }) {
-	print "1..0 # skip: no Test::More, Text::Unidecode, charnames and/or Encode modules\n";
+	print "1..0 # skip: no Test::More, Text::Unidecode >=1.01, charnames and/or Encode modules\n";
 	exit;
     }
 }
@@ -37,7 +37,7 @@ my $x = "" .
     "\N{LATIN CAPITAL LETTER U WITH DIAERESIS}" .
     "\N{LATIN SMALL LETTER U WITH DIAERESIS}" .
     "\x{20ac}\N{HORIZONTAL ELLIPSIS}\N{LEFT DOUBLE QUOTATION MARK}";
-is(unidecode_any($x, "iso-8859-1"), q{ÄäÖöÜüEU..."});
-is(unidecode_any($x, "ascii"), q{AeaeOeoeUeueEU..."});
+is(unidecode_any($x, "iso-8859-1"), q{ÄäÖöÜüEUR..."});
+is(unidecode_any($x, "ascii"), q{AeaeOeoeUeueEUR..."});
 
 __END__
