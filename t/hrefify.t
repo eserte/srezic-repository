@@ -2,7 +2,6 @@
 # -*- perl -*-
 
 #
-# $Id: hrefify.t,v 1.2 2005/12/12 23:57:19 eserte Exp $
 # Author: Slaven Rezic
 #
 
@@ -12,9 +11,10 @@ use FindBin;
 BEGIN {
     if (!eval q{
 	use Test::More;
+	use HTML::Entities;
 	1;
     }) {
-	print "1..0 # skip: no Test::More module\n";
+	print "1..0 # skip: no Test::More and/or HTML::Entities modules\n";
 	exit;
     }
 }
