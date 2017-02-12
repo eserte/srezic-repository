@@ -13,9 +13,10 @@ BEGIN {
     if (!eval q{
 	use Test::More;
 	use File::Temp;
+	use XML::LibXML;
 	1;
     }) {
-	print "# tests only work with installed Test::More and/or File::Temp modules\n";
+	print "# tests only work with installed Test::More, XML::LibXML and/or File::Temp modules\n";
 	print "1..1\n";
 	print "ok 1\n";
 	exit;
