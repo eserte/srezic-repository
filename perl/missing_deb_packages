@@ -1,0 +1,58 @@
+=head2 missing_deb_packages
+
+=for category Debian
+
+For the given list of package, return all which are currently not
+installed.
+
+=cut
+
+sub missing_deb_packages {
+    my(@packages) = @_;
+    return if !@packages;
+
+    require IPC::Open3;
+    require Symbol;
+
+    my @missing_packages;
+
+    if (@packages) {
+	my %seen_packages;
+	my %required_version;
+	for my $package (@packages) {
+	    if (ref $package eq 'ARRAY') {
+		my($package_name, $package_version) = @$package;
+		$required_version{$package_name} = $package_version;
+		$package = $package_name;
+	    }
+	}
+	my @cmd = ('dpkg-query', '-W', '-f=${Package}\t${Status}\t${Version}\n', @packages);
+	my $err = Symbol::gensym();
+	my $fh;
+	my $pid = IPC::Open3::open3(undef, $fh, $err, @cmd)
+	    or die "Error running '@cmd': $!";
+	while(<$fh>) {
+	    chomp;
+	    if (m{^([^\t]+)\t([^\t]+)\t([^\t]*)$}) {
+		if ($2 ne 'install ok installed') {
+		    push @missing_packages, $1;
+		}
+		if ($required_version{$1} && $required_version{$1} ne $3) {
+		    push @missing_packages, $1;
+		}
+		$seen_packages{$1} = 1;
+	    } else {
+		warn "ERROR: cannot parse $_, ignore line...\n";
+	    }
+	}
+	waitpid $pid, 0;
+	for my $package (@packages) {
+	    if (!$seen_packages{$package}) {
+		push @missing_packages, $package;
+	    }
+	}
+    }
+    @missing_packages;
+
+}
+
