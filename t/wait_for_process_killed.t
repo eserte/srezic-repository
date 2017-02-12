@@ -2,9 +2,16 @@
 
 use strict;
 use FindBin;
-use IPC::Run 'run';
+use Test::More;
 use IO::Pipe ();
-use Test::More 'no_plan';
+
+BEGIN {
+    if (!eval q{ use IPC::Run 'run'; 1 }) {
+	plan skip_all => 'No IPC::Run available';
+    }
+}
+
+plan 'no_plan';
 
 my $sh_repo = "$FindBin::RealBin/../sh";
 
