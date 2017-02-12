@@ -7,15 +7,11 @@
 
 use strict;
 use FindBin;
-use Tk;
-
-# BEGIN DO
-do "$FindBin::RealBin/../perl/tk_dimensions";
-# END DO
 
 BEGIN {
     if (!eval q{
 	use Test::More;
+	use Tk;
 	1;
     }) {
 	print join("", map { "# $_\n" } split(/\n/, $@));
@@ -25,11 +21,18 @@ BEGIN {
     }
 }
 
+# BEGIN DO
+do "$FindBin::RealBin/../perl/tk_dimensions";
+# END DO
+
+my $top = eval { MainWindow->new };
+plan skip_all => "Can't create MainWindow: $@" if !$top;
+
 plan tests => 23;
 
 local $TODO = "Failures have to be investigated (different font metrics maybe?)";
 
-my $top = new MainWindow;
+$top->geometry("+0+0");
 check_dim($top, 200, 200);
 
 $top->geometry("300x100");
