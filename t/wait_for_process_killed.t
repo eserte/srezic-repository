@@ -11,11 +11,18 @@ BEGIN {
     }
 }
 
+# BEGIN DO
+do "$FindBin::RealBin/../perl/is_in_path";
+do "$FindBin::RealBin/../perl/file_name_is_absolute";
+# END DO
+
 plan 'no_plan';
 
 my $sh_repo = "$FindBin::RealBin/../sh";
 
 for my $shell ('sh', 'bash', 'zsh') {
+SKIP: {
+    skip "$shell is not installed", 1 if !is_in_path($shell);
     my $t0 = time;
     note "Double-fork test child for $shell...";
     my $pipe = IO::Pipe->new;
@@ -51,4 +58,5 @@ for my $shell ('sh', 'bash', 'zsh') {
     ok !kill 0 => $pid;
     cmp_ok $t1-$t0, '>=', 3;
     cmp_ok $t1-$t0, '<=', 4;
+}
 }
