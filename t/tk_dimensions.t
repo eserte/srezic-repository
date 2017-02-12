@@ -2,7 +2,6 @@
 # -*- perl -*-
 
 #
-# $Id: tk_dimensions.t,v 1.2 2004/04/08 12:45:42 eserte Exp $
 # Author: Slaven Rezic
 #
 
@@ -16,7 +15,7 @@ do "$FindBin::RealBin/../perl/tk_dimensions";
 
 BEGIN {
     if (!eval q{
-	use Test;
+	use Test::More;
 	1;
     }) {
 	print join("", map { "# $_\n" } split(/\n/, $@));
@@ -26,7 +25,7 @@ BEGIN {
     }
 }
 
-BEGIN { plan tests => 23 }
+plan tests => 23;
 
 local $TODO = "Failures have to be investigated (different font metrics maybe?)";
 
@@ -79,7 +78,7 @@ sub test_widget {
     my($type, $expected_width, $expected_height, %args) = @_;
 
     my $w = $top->$type(%args)->pack;
-    ok(!!Tk::Exists($w), 1, "Can't create $type widget");
+    ok Tk::Exists($w), "Can create $type widget";
     check_dim($w, $expected_width, $expected_height);
     $w->destroy;
 }
@@ -87,8 +86,8 @@ sub test_widget {
 sub check_dim {
     my($w, $expected_width, $expected_height) = @_;
     my @dim = $w->dimensions;
-    ok($dim[0], $expected_width,  "Unexpected $w width");
-    ok($dim[1], $expected_height, "Unexpected $w height");
+    is $dim[0], $expected_width,  "expected $w width";
+    is $dim[1], $expected_height, "expected $w height";
 }
 
 __END__
