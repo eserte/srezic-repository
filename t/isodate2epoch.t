@@ -4,11 +4,12 @@
 #
 # Author: Slaven Rezic
 #
-# Copyright (C) 2000 Onlineoffice. All rights reserved.
+# Copyright (C) 2000, 2017 Slaven Rezic.
 #
 
 use strict;
 use FindBin;
+use POSIX 'tzset';
 use Test::More;
 # BEGIN DO
 do "$FindBin::RealBin/../perl/isodate2epoch";
@@ -16,6 +17,8 @@ do "$FindBin::RealBin/../perl/epoch2isodate";
 # END DO
 
 plan tests => 5;
+
+$ENV{TZ} = 'Europe/Berlin'; tzset;
 
 is isodate2epoch("19701112134500"), 27261900, "parse ISO date";
 is isodate2epoch("19701112"),       27212400, "parse ISO date without time part";
