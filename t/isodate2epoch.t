@@ -9,8 +9,15 @@
 
 use strict;
 use FindBin;
-use POSIX 'tzset';
 use Test::More;
+BEGIN {
+    if ($^O eq 'MSWin32') {
+	plan skip_all => 'tzset not implemented on Windows';
+    }
+}
+
+use POSIX 'tzset';
+
 # BEGIN DO
 do "$FindBin::RealBin/../perl/isodate2epoch";
 do "$FindBin::RealBin/../perl/epoch2isodate";
