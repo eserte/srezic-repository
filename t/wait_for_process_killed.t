@@ -9,6 +9,9 @@ BEGIN {
     if (!eval q{ use IPC::Run 'run'; 1 }) {
 	plan skip_all => 'No IPC::Run available';
     }
+    if ($^O eq 'MSWin32') {
+	plan skip_all => 'Does not work on Windows';
+    }
 }
 
 # BEGIN DO
