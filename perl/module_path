@@ -1,0 +1,18 @@
+=head2 module_path($module)
+
+Return path of module or undef.
+
+=cut
+
+sub module_path {
+    my($filename) = @_;
+    $filename =~ s{::}{/}g;
+    $filename .= ".pm";
+    foreach my $prefix (@INC) {
+	my $realfilename = "$prefix/$filename";
+	if (-r $realfilename) {
+	    return $realfilename;
+	}
+    }
+    return undef;
+}
