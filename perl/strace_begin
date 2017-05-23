@@ -28,7 +28,7 @@ BEGIN {
 	my $self = shift;
 	my $strace_pid = $self->{strace_pid};
 	die "Should never happen: no strace_pid in " . ref($self) if !$strace_pid;
-	kill 9 => $strace_pid;
+	kill INT => $strace_pid;
 	waitpid $strace_pid, 0;
     };
     no strict 'refs';
