@@ -1,11 +1,14 @@
 language: perl
 
+dist: trusty
 matrix:
   include:
 # First five
     - perl: "5.22"
-      env: WITH_ALL_DEPS=1
+      env: WITH_ALL_PM_DEPS=1
     - perl: "5.20"
+      env: WITH_STRACE=1
+      sudo: true
     - perl: "5.18"
     - perl: "5.16"
     # The perl does not matter here, system perl will be used
@@ -15,14 +18,14 @@ matrix:
     - perl: "5.12"
     - perl: "5.10"
     - perl: "5.8"
-      env: WITH_ALL_DEPS=1
+      env: WITH_ALL_PM_DEPS=1
     # Actually the perl here does not matter
     - perl: "5.14"
       env: USE_SYSTEM_PERL=1
+      dist: precise
     # Actually the perl here does not matter
     - perl: "5.18"
       env: USE_SYSTEM_PERL=1
-      dist: trusty
 
 before_install:
  - if [ "$USE_SYSTEM_PERL" = 1 ]; then perlbrew off; fi
@@ -34,7 +37,8 @@ install:
  #
  # On Linux run the normal travis-ci install command.
  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then cpanm --quiet --installdeps --notest .; fi
- - if [ "$WITH_ALL_DEPS" = "1" ]; then cpanm --quiet --notest Date::Manip IPC::Run Tk Text::Unidecode XML::LibXML; fi
+ - if [ "$WITH_ALL_PM_DEPS" = "1" ]; then cpanm --quiet --notest Date::Manip IPC::Run Tk Text::Unidecode XML::LibXML; fi
+ - if [ "$WITH_STRACE" = "1" -a "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get update -qq; sudo apt-get install -qq strace; sudo sh -c 'echo 0 > /proc/sys/kernel/yama/ptrace_scope'; fi
 
 script:
  - perl Makefile.PL && env HARNESS_TIMER=1 make test
