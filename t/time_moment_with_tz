@@ -1,0 +1,42 @@
+#!/usr/bin/perl -w
+# -*- cperl -*-
+
+#
+# Author: Slaven Rezic
+#
+
+use strict;
+use FindBin;
+
+BEGIN {
+    if (!eval q{
+	use Test::More;
+	use Time::Moment;
+	use DateTime::TimeZone;
+	1;
+    }) {
+	print "1..0 # skip: no Test::More, Time::Moment or DateTime::TimeZone modules\n";
+	exit;
+    }
+}
+
+plan 'no_plan';
+
+do "$FindBin::RealBin/../perl/time_moment_with_tz";
+
+{
+    my @tm;
+    for (0..1) {
+	$tm[$_] = time_moment_with_tz('2017-01-01T12:45:56', 'Europe/Berlin');
+    }
+    is $tm[0]->epoch, 1483271156;
+    is $tm[1], $tm[0], 'consistent result for multiple calls';
+}
+
+{
+    my @tm;
+    for (0..1) {
+	$tm[$_] = time_moment_with_tz('2017-01-01T12:45:56');
+    }
+    is $tm[1], $tm[0], 'consistent result, using default timezone (local)';
+}

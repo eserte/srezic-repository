@@ -1,0 +1,32 @@
+=head2 time_moment_with_tz($iso8601, $tzname)
+
+Return a Time::Moment object with the given local ISO8601 date
+(without any timezone specification) converted to the given timezone.
+
+I<$tzname> defaults to C<local> if not given.
+
+=cut
+
+{
+    # Do some caching, constructing the "local" DT::TZ object may take
+    # more than 1ms (and somewhat faster with newer DT::TZ versions)
+    my $last_tzname;
+    my $last_dttz;
+
+    sub time_moment_with_tz ($;$) {
+	my($iso8601, $tzname) = @_;
+	$tzname = 'local' if !defined $tzname;
+	require Time::Moment;
+	my $tm = Time::Moment->from_string($iso8601.'Z');
+	my $dttz;
+	if (defined $last_tzname && $last_tzname eq $tzname) {
+	    $dttz = $last_dttz;
+	} else {
+	    require DateTime::TimeZone;
+	    $dttz = $last_dttz = DateTime::TimeZone->new(name => $tzname);
+	    $last_tzname = $tzname;
+	}
+	my $offset = $dttz->offset_for_local_datetime($tm) / 60;
+	$tm->with_offset_same_local($offset);
+    }
+}
