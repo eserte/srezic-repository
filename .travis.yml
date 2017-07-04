@@ -38,7 +38,11 @@ install:
  # On Linux run the normal travis-ci install command.
  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then cpanm --quiet --installdeps --notest .; fi
  - if [ "$WITH_ALL_PM_DEPS" = "1" ]; then cpanm --quiet --notest Date::Manip IPC::Run Tk Text::Unidecode XML::LibXML DateTime::TimeZone Time::Moment; fi
- - if [ "$WITH_STRACE" = "1" -a "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get update -qq; sudo apt-get install -qq strace; sudo sh -c 'echo 0 > /proc/sys/kernel/yama/ptrace_scope'; fi
+ # user-level strace does not work on newer linux kernels
+ # without fiddling with the ptrace_scope setting ---
+ # so make sure to remove the strace test if WITH_STRACE
+ # is not set.
+ - if [ "$WITH_STRACE" = "1" -a "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get update -qq; sudo apt-get install -qq strace; sudo sh -c 'echo 0 > /proc/sys/kernel/yama/ptrace_scope'; else rm t/strace_begin.t; fi
 
 script:
  - perl Makefile.PL && env HARNESS_TIMER=1 make test
