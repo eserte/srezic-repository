@@ -5,13 +5,12 @@
 Return the pathname of $prog, if the program is in the PATH, or undef
 otherwise.
 
-DEPENDENCY: file_name_is_absolute
-
 =cut
 
 sub is_in_path {
     my($prog) = @_;
-    if (file_name_is_absolute($prog)) {
+    require File::Spec;
+    if (File::Spec->file_name_is_absolute($prog)) {
 	if ($^O eq 'MSWin32') {
 	    return $prog       if (-f $prog && -x $prog);
 	    return "$prog.bat" if (-f "$prog.bat" && -x "$prog.bat");

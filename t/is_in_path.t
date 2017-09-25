@@ -20,14 +20,14 @@ BEGIN {
 }
 
 # BEGIN DO
-do "$FindBin::RealBin/../perl/file_name_is_absolute";
 do "$FindBin::RealBin/../perl/is_in_path";
 # END DO
+require File::Spec;
 
 plan tests => 3;
 
 ok(is_in_path($^X), "Perl with from \$^X");
 ok(!is_in_path("this program does not exist"), "Not existing");
-ok(file_name_is_absolute(is_in_path($^X)), "Returned filename is absolute");
+ok(File::Spec->file_name_is_absolute(is_in_path($^X)), "Returned filename is absolute");
 
 __END__
