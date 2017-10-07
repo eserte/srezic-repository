@@ -13,7 +13,8 @@ install:
 # Try to install Tk with PPM first, as it's much faster ---
 # if successful, then "cpanm Tk" will be a no-op
   - ppm install Tk
-  - cpanm --quiet --notest Date::Manip IPC::Run "Tk~>=800" Text::Unidecode XML::LibXML
+  - perl -MTk -e1 || cpanm --quiet --notest Tk
+  - cpanm --quiet --notest Date::Manip IPC::Run Text::Unidecode XML::LibXML
 
 build_script:
   - perl Makefile.PL
