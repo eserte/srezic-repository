@@ -25,6 +25,9 @@ do "$FindBin::RealBin/../perl/file_name_is_absolute";
 if (!is_in_path('strace')) {
     plan skip_all => 'No strace available on this system';
 }
+if ($^O eq 'MSWin32') {
+    plan skip_all => "Fails on Windows systems";
+}
 
 # BEGIN, so prototypes work
 BEGIN {
