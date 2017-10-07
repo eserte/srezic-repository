@@ -10,7 +10,10 @@ install:
   - if not exist "C:\strawberry" cinst --allow-empty-checksums strawberryperl
   - set PATH=C:\strawberry\perl\bin;C:\strawberry\perl\site\bin;C:\strawberry\c\bin;%PATH%
   - cd C:\projects\%APPVEYOR_PROJECT_NAME%
-  - cpanm --quiet --notest Date::Manip IPC::Run Tk Text::Unidecode XML::LibXML
+# Try to install Tk with PPM first, as it's much faster ---
+# if successful, then "cpanm Tk" will be a no-op
+  - ppm install Tk
+  - cpanm --quiet --notest Date::Manip IPC::Run "Tk~>=800" Text::Unidecode XML::LibXML
 
 build_script:
   - perl Makefile.PL
