@@ -1,0 +1,43 @@
+=head2 walk_with_dot_notation
+
+=for category Hash
+
+Walk through a nested hash or array, providing also the current path
+in dot notation.
+
+    walk_with_dot_notation($ref, sub {
+        my($path, $value) = @_;
+        ...
+    });
+
+=cut
+
+sub walk_with_dot_notation {
+    my($ref, $cb) = @_;
+
+    my $walk_with_dot_notation_with_path;
+    $walk_with_dot_notation_with_path = sub {
+	my($ref, $cb, $pathref) = @_;
+	if (ref $ref eq 'HASH') {
+	    for my $key (keys %$ref) {
+		my $val = $ref->{$key};
+		if (ref $val) {
+		    $walk_with_dot_notation_with_path->($val, $cb, [@$pathref, $key]);
+		} else {
+		    $cb->(join('.', @$pathref, $key), $val);
+		}
+	    }
+	} elsif (ref $ref eq 'ARRAY') {
+	    for my $i (0 .. $#$ref) {
+		my $val = $ref->[$i];
+		if (ref $val) {
+		    $walk_with_dot_notation_with_path->($val, $cb, [@$pathref, $i]);
+		} else {
+		    $cb->(join('.', @$pathref, $i), $val);
+		}
+	    }
+	}
+    };
+
+    $walk_with_dot_notation_with_path->($ref, $cb, []);
+}
