@@ -2,6 +2,8 @@
 
 =head2 get_by_dot_notation
 
+=head2 set_by_dot_notation
+
 =for category Hash
 
 Deal with nested hashes in dot notation.
