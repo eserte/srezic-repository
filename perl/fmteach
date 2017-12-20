@@ -1,0 +1,23 @@
+=head2 fmteach
+
+=for category Hash
+
+    fmteach {
+        my($key,$val,$keyfmt,$valfmt) = @_;
+        printf "$keyfmt $valfmt\n", $key, $val;
+    } \%hash
+
+Iterates over a hash, providing formatting strings for
+L<perlfunc/printf> and friends.
+
+=cut
+
+sub fmteach (&%) {
+    my($cb, $hashref) = @_;
+    require List::Util;
+    my $keyfmt = "%-" . (List::Util::max(map { length } keys   %$hashref)) . "s";
+    my $valfmt = "%-" . (List::Util::max(map { length } values %$hashref)) . "s";
+    while(my($key,$val) = each %$hashref) {
+	$cb->($key, $val, $keyfmt, $valfmt);
+    }
+}
