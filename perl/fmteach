@@ -5,19 +5,41 @@
     fmteach {
         my($key,$val,$keyfmt,$valfmt) = @_;
         printf "$keyfmt $valfmt\n", $key, $val;
-    } \%hash
+    } \%hash, flags => ..., sorted => ...;
 
 Iterates over a hash, providing formatting strings for
 L<perlfunc/printf> and friends.
 
+By default, flags is set to "-", yieling in a left-aligned fmt. Use ""
+for right alignment, see L<perlfunc/sprintf> for other flags.
+
+By default, sort order is the natural hash order, which may be random
+(perl >= 5.17.6) or sorted (if this is a hash tied to L<Tie::IxHash>
+or similar). To force a (alpha) sorted output, use C<< sorted=>1 >>.
+
 =cut
 
-sub fmteach (&%) {
-    my($cb, $hashref) = @_;
+sub fmteach (&\%@) {
+    my($cb, $hashref, %opts) = @_;
+    my $sorted = delete $opts{sorted};
+    my $flags = '-';
+    if (defined $opts{flags}) {
+	$flags = $opts{flags};
+    }
+    delete $opts{flags};
+    die "Unhandled options: " . join(" ", %opts) if %opts;
+
     require List::Util;
-    my $keyfmt = "%-" . (List::Util::max(map { length } keys   %$hashref)) . "s";
-    my $valfmt = "%-" . (List::Util::max(map { length } values %$hashref)) . "s";
-    while(my($key,$val) = each %$hashref) {
-	$cb->($key, $val, $keyfmt, $valfmt);
+    my $keyfmt = "%" . $flags . (List::Util::max(map { length } keys   %$hashref)) . "s";
+    my $valfmt = "%" . $flags . (List::Util::max(map { length } values %$hashref)) . "s";
+    if ($sorted) {
+	for my $key (sort keys %$hashref) {
+	    my $val = $hashref->{$key};
+	    $cb->($key, $val, $keyfmt, $valfmt);
+	}
+    } else {
+	while(my($key,$val) = each %$hashref) {
+	    $cb->($key, $val, $keyfmt, $valfmt);
+	}
     }
 }
