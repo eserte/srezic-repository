@@ -1,0 +1,6 @@
+sub usage (;$) {
+    if (defined $_[0]) {
+	warn $_[0], "\n";
+    }
+    die "usage: $0 ...\n";
+}
