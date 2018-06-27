@@ -1,0 +1,18 @@
+=head2 file_to_map
+
+=for category Hash
+
+    file_to_map $file_or_pipedcmd, qr{...(?<k>...)...(?<v>...)};
+
+Iterates over the given file or piped command, and creates a hash map
+out of the parsed lines. The given regexp should contain the named
+captures C<k> and C<v> which will be used for key and value,
+respectively. Lines not matching the regexp will cause warnings (at
+most two warnings).
+
+The function is deliberately written in one line to help usage in
+one-liners.
+
+=cut
+
+sub file_to_map ($$) { my($file, $rx) = @_; my %map; my $warned = 0; open my $fh, $file or die "Cannot open $file: $!"; while(<$fh>) { if ($_ =~ $rx) { $map{$+{k}} = $+{v} } elsif (!$warned++) { chomp; warn "Line <$_> does not match <$rx> (warn only once)" } } if ($warned > 1) { warn "Total warnings: $warned" } \%map }
