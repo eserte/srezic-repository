@@ -9,7 +9,7 @@ matrix:
     - perl: "5.20"
       env: WITH_STRACE=1
       sudo: true
-    - perl: "5.18"
+    - perl: "5.26"
     - perl: "5.16"
     # The perl does not matter here, system perl will be used
     - perl: "5.18"
