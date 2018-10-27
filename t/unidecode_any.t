@@ -2,7 +2,6 @@
 # -*- perl -*-
 
 #
-# $Id: unidecode_any.t,v 1.2 2007/06/09 19:23:58 eserte Exp $
 # Author: Slaven Rezic
 #
 
@@ -30,8 +29,7 @@ do "$FindBin::RealBin/../perl/unidecode_any";
 plan tests => 2;
 
 TODO: {
-    todo_skip "Aborts with perl 5.20+, need to be investigated", 2
-	if $] >= 5.020;
+    todo_skip "Aborts with perl 5.20..5.24", 2 if $] >= 5.020 && $] < 5.026;
     my $x = "" .
 	"\N{LATIN CAPITAL LETTER A WITH DIAERESIS}" .
 	"\N{LATIN SMALL LETTER A WITH DIAERESIS}" .
