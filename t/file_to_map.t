@@ -12,6 +12,10 @@ use File::Temp ();
 use Test::More;
 
 BEGIN {
+    plan skip_all => 'Requires perl 5.10 regexp features (named captures)' if $] < 5.010;
+}
+
+BEGIN {
 # BEGIN DO
 do "$FindBin::RealBin/../perl/file_to_map";
 # END DO
