@@ -37,7 +37,7 @@ install:
  #
  # On Linux run the normal travis-ci install command.
  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then cpanm --quiet --installdeps --notest .; fi
- - if [ "$WITH_ALL_PM_DEPS" = "1" ]; then cpanm --quiet --notest Date::Manip IPC::Run Tk Text::Unidecode XML::LibXML DateTime::TimeZone Time::Moment; fi
+ - if [ "$WITH_ALL_PM_DEPS" = "1" ]; then cpanm --quiet --notest Date::Manip IPC::Run Tk Text::Unidecode XML::LibXML XTerm::Conf DateTime::TimeZone Time::Moment; fi
  # user-level strace does not work on newer linux kernels
  # without fiddling with the ptrace_scope setting ---
  # so make sure to remove the strace test if WITH_STRACE
