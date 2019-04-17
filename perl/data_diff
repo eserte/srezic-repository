@@ -1,0 +1,74 @@
+=head2 data_diff
+
+=for category Data
+
+    print data_diff $old_structure, $new_structure, $options;
+
+Works like L<Test::Differences/eq_or_diff> (and in fact, most of the
+code is taken from L<Test::Differences>), but works outside the
+context of a test script. Just returns the difference of two data
+structures as a string, suitable for printing.
+
+Notable differences to C<eq_or_diff>:
+
+=over
+
+=item There's not I<$name> parameter (the 3rd argument).
+
+=item The "filename" labels are "Old" and "New" instead of "Got" and "Expected".
+
+=item It's not possible to turn C<Sortkeys> off --- in the times of
+hash randomization perls turning it off would be rather useless.
+
+=item The diff style is set by the new option C<diff_style>.
+
+=item 
+
+=back
+
+=cut
+
+sub data_diff {
+    my($old, $new, $options) = @_;
+    my $data_type  = delete $options->{data_type} || (!ref $old && !ref $new ? 'text' : 'data');
+    my $filename_a = delete $options->{filename_a} || 'Old';
+    my $filename_b = delete $options->{filename_b} || 'New';
+    my $context    = delete $options->{context}    || 2**31;
+    my $diff_style = delete $options->{diff_style} || 'Table';
+    die "context must be an integer: '$context'"
+	unless $context =~ /\A\d+\z/;
+    die "unhandled options: " . join(" ", %$options)
+	if %$options;
+
+    require Data::Dumper;
+    require Text::Diff;
+    require Text::Diff::Config;
+
+    no warnings 'once';
+    local $Text::Diff::Config::Output_Unicode = 1;
+    local $Data::Dumper::Indent    = 1;
+    local $Data::Dumper::Purity    = 0;
+    local $Data::Dumper::Terse     = 1;
+    local $Data::Dumper::Deepcopy  = 1;
+    local $Data::Dumper::Quotekeys = 0;
+    local $Data::Dumper::Useperl   = 1;
+    local $Data::Dumper::Sortkeys  = 1;
+    
+    for ($old, $new) {
+	$_ = [ split /^/, Data::Dumper::Dumper($_) ];
+    }
+
+    my $joint = chr(0) . "A" . chr(1);
+    return ''
+	if join( $joint, @$old ) eq join( $joint, @$new );
+
+    return Text::Diff::diff($old, $new,
+        { CONTEXT     => $context,
+	  STYLE       => $diff_style,
+	  FILENAME_A  => $filename_a,
+	  FILENAME_B  => $filename_b,
+	  OFFSET_A    => $data_type eq "text" ? 1 : 0,
+	  OFFSET_B    => $data_type eq "text" ? 1 : 0,
+	  INDEX_LABEL => $data_type eq "text" ? "Ln" : "Elt",
+        });
+}
