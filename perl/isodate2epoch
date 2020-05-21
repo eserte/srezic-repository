@@ -20,5 +20,5 @@ sub isodate2epoch {
 	require Date::Manip;
         return Date::Manip::ParseDate($isodate);
     }
-    Time::Local::timelocal($S,$M,$H,$d,$m-1,$y-1900);
+    Time::Local::timelocal($S,$M,$H,$d,$m-1,$y);
 }
