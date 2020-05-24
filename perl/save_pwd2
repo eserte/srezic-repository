@@ -20,7 +20,7 @@ BEGIN {
 	my $self = shift;
 	if (defined $self->{cwd}) {
 	    chdir $self->{cwd}
-	        or die "Can't chdir to $self->{cwd}: $!";
+	        or die "Can't chdir back to $self->{cwd}: $!";
 	}
     };
     no strict 'refs';
