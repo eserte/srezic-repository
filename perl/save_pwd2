@@ -11,6 +11,7 @@ BEGIN {
     sub save_pwd2 {
 	require Cwd;
 	my $pwd = Cwd::getcwd();
+	$pwd = undef if defined $pwd && $pwd eq ''; # might be consinstent in older Cwd versions 
 	if (!defined $pwd) {
 	    warn "No known current working directory";
 	}
