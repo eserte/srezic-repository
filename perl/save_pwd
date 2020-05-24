@@ -9,9 +9,20 @@ directory will still be valid.
 
 sub save_pwd (&) {
     my $code = shift;
-    require Cwd;
-    my $pwd = Cwd::getcwd();
-    $pwd = undef if defined $pwd && $pwd eq ''; # might be consinstent in older Cwd versions 
+    my $pwd;
+    if (1) { # test and use fchdir()
+	open $pwd, '.'
+	    or undef $pwd;
+	if (defined $pwd) {
+	    eval { chdir $pwd }
+		or undef $pwd;
+	}
+    }
+    if (!defined $pwd) {
+	require Cwd;
+	$pwd = Cwd::getcwd();
+	$pwd = undef if defined $pwd && $pwd eq ''; # might be consinstent in older Cwd versions 
+    }
     if (!defined $pwd) {
         warn "No known current working directory";
     }

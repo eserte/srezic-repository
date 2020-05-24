@@ -17,6 +17,8 @@ do "$FindBin::RealBin/../perl/save_pwd2";
 # END DO
 }
 
+diag "fchdir() available on this system (and will be used)" if _can_fchdir();
+
 {
     my $cwd = _get_pwd();
     {
@@ -71,7 +73,11 @@ SKIP: {
 	       my $save_pwd_inner = save_pwd2;
 	       rmdir "$tempdir/to_be_removed";
 	   };
-	   like "@warnings", qr{Can't chdir back to}, 'expected warning in cleanup'; # exceptions in DESTROY do not seem to cause exceptions
+	   if (_can_fchdir()) {
+	       is "@warnings", '', 'no warnings if fchdir is used';
+	   } else {
+	       like "@warnings", qr{Can't chdir back to}, 'expected warning in cleanup'; # exceptions in DESTROY do not seem to cause exceptions
+	   }
 	   # _get_pwd is probably undefined at this point
        }
    }
@@ -88,7 +94,11 @@ SKIP: {
 	       my $save_pwd_outer = save_pwd2;
 	       # nothing else to do here
 	   }
-	   like "@warnings", qr{No known current working directory}, 'excepted warning';
+	   if (_can_fchdir()) {
+	       is "@warnings", '', 'no warnings if fchdir is used';
+	   } else {
+	       like "@warnings", qr{No known current working directory}, 'excepted warning';
+	   }
 	   # _get_pwd is probably undefined at this point
        }
    }
@@ -108,6 +118,11 @@ sub _get_pwd {
 	}
 	$cwd;
     }
+}
+
+sub _can_fchdir {
+    my $pwd;
+    open $pwd, '.' and eval { chdir $pwd; 1 };
 }
 
 __END__
