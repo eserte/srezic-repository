@@ -37,6 +37,19 @@ do "$FindBin::RealBin/../perl/save_pwd";
     is _get_pwd(), $cwd, 'directory still unchanged';
 }
 
+{
+    my $cwd = _get_pwd();
+    save_pwd {
+	chdir "/";
+	my $root_pwd = _get_pwd();
+	save_pwd {
+	    chdir $cwd;
+	};
+	is _get_pwd(), $root_pwd, 'nesting save_pwd blocks (inner)';
+    };
+    is _get_pwd(), $cwd, 'nesting save_pwd blocks (outer)';
+}
+
 SKIP: {
     skip "Removing directories with an active cwd not possible", 2
 	if $^O eq 'MSWin32';
@@ -82,7 +95,12 @@ sub _get_pwd {
 	$pwd;
     } else {
 	require Cwd;
-	Cwd::getcwd();
+	my $cwd = Cwd::getcwd();
+	if ($^O eq 'MSWin32') {
+	    # strip possibly existing drive letter (getcwd() is unfortunately inconsistent and may return it or not)
+	    $cwd =~ s{^[a-z]:}{}i;
+	}
+	$cwd;
     }
 }
 
