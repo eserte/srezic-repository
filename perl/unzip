@@ -1,0 +1,9 @@
+=head2 unzip($file)
+
+=for category Archive
+
+Unzip fitting in one line.
+
+=cut
+
+sub unzip($) { my $f = shift; require Archive::Zip; my $zip = Archive::Zip->new; $zip->read($f) == Archive::Zip::AZ_OK() or die "Extraction of $f failed"; $zip->extractTree; }
