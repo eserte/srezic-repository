@@ -1,0 +1,29 @@
+=head2 in_or_die($value, @list)
+
+=for category Data
+
+Throw an exception (using C<Carp::croak> if it's available, otherwise
+C<die>) if the given value is not in the given list, otherwise return
+true. Comparison is done as string comparison.
+
+=cut
+
+sub in_or_die {
+    my $msgprefix;
+    if (ref $_[0] eq 'HASH') {
+	my %opt = %{ shift @_ };
+	$msgprefix = delete $opt{msgprefix};
+	die "Unhandled options: " . join(" ", %opt) if %opt;
+    }
+    my($value, @list) = @_;
+
+    for my $elem (@list) {
+	return 1 if $value eq $elem;
+    }
+    my $msg = (defined $msgprefix ? $msgprefix : "The value") . " '$value' is not in the expected list " . join(", ", map { qq{'$_'} } @list);
+    if (defined &Carp::croak) {
+	Carp::croak($msg);
+    } else {
+	die($msg);
+    }
+}
