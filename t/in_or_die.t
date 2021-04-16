@@ -57,7 +57,7 @@ exception_expected { in_or_die({invopt => "bla"}, "bar", qw(foo bar)) } qr{^\QUn
     exception_expected { in_or_die({msgprefix => "da value"}, "missing", qw(foo bar)) } qr{^\Qda value 'missing' is not in the expected list 'foo', 'bar' at }, 'with msgprefix option';
 }
 
-exception_expected { in_or_die("missing", qw(foo bar)) } qr{^\QThe value 'missing' is not in the expected list 'foo', 'bar' at \E.*\n.*\Qmain::in_or_die("missing", "foo", "bar")\E}, 'invalid value detected (with Carp)';
-exception_expected { in_or_die({msgprefix => "da value"}, "missing", qw(foo bar)) } qr{^\Qda value 'missing' is not in the expected list 'foo', 'bar' at \E.*\n.*\Qmain::in_or_die(HASH(0x\E[0-9a-f]+\Q), "missing", "foo", "bar")\E}, 'with msgprefix option';
+exception_expected { in_or_die("missing", qw(foo bar)) } qr{^\QThe value 'missing' is not in the expected list 'foo', 'bar' at \E.*\n.*\Qmain::in_or_die(\E}, 'invalid value detected (with Carp)';
+exception_expected { in_or_die({msgprefix => "da value"}, "missing", qw(foo bar)) } qr{^\Qda value 'missing' is not in the expected list 'foo', 'bar' at \E.*\n.*\Qmain::in_or_die(\E}, 'with msgprefix option';
 
 __END__
