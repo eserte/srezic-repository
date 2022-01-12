@@ -1,0 +1,55 @@
+=head2 cmpthese_and_test(...)
+
+=for category Benchmark
+
+=for category Test
+
+Run Benchmark's C<cmpthese> with the specified code references.
+Before, make sure that all code references return the same value
+(complex or scalar). For the user's convenience the argument handling
+is more lax than in the original C<cmpthese>; it's possible to omit
+the count parameter (which would then default to -1), and it's also
+possible to omit the curlies for the code reference hash.
+
+=cut
+
+sub cmpthese_and_test {
+    my $count;
+    my $codehashref;
+    my $style;
+    if (ref $_[0] eq 'HASH') {
+	$count       = -1;
+	$codehashref = $_[0];
+    } elsif (ref $_[1] eq 'HASH') {
+	$count       = $_[0];
+	$codehashref = $_[1];
+	$style       = $_[2];
+    } else {
+	if ($_[0] =~ m{^[+-]?\d+(\.\d+)?$}) {
+	    $count = shift;
+	} else {
+	    $count = -1;
+	}
+	$codehashref = { @_ };
+    }
+
+    require Test::More;
+    my @tests = sort keys %$codehashref;
+    if (@tests < 2) {
+	Test::More::pass("Nothing to compare against");
+    } else {
+	my $res1 = $codehashref->{$tests[0]}->();
+	for my $test (@tests[1..$#tests]) {
+	    my $res2 = $codehashref->{$test}->();
+	    if (ref $res1) {
+		Test::More::is_deeply($res2, $res1, "compare deeply $tests[0] and $test");
+	    } else {
+		Test::More::is($res2, $res1, "compare $tests[0] and $test");
+	    }
+	}
+    }
+    Test::More::done_testing();
+
+    require Benchmark;
+    Benchmark::cmpthese($count, $codehashref, (defined $style ? $style : ()));
+}
