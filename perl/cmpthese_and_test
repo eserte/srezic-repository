@@ -34,6 +34,7 @@ sub cmpthese_and_test {
     }
 
     require Test::More;
+    Test::More::plan('no_plan');
     my @tests = sort keys %$codehashref;
     if (@tests < 2) {
 	Test::More::pass("Nothing to compare against");
@@ -48,7 +49,6 @@ sub cmpthese_and_test {
 	    }
 	}
     }
-    Test::More::done_testing();
 
     require Benchmark;
     Benchmark::cmpthese($count, $codehashref, (defined $style ? $style : ()));
