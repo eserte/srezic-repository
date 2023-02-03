@@ -42,7 +42,7 @@ require Time::HiRes;
     my $tmp = File::Temp->new;
     my $res = strace {
 	for (1..2) {
-	    Time::HiRes::sleep(0.1);
+	    Time::HiRes::sleep(0.3);
 	}
 	"scalar result";
     } '-o', "$tmp", '-f';
@@ -60,7 +60,7 @@ require Time::HiRes;
     {
 	my $strace_keeper = strace_begin(qw(-tt -T -f --strace-cmd), ['strace'], '-o', "$tmp");
 	for (1..2) {
-	    Time::HiRes::sleep(0.1);
+	    Time::HiRes::sleep(0.3);
 	}
     }
     $tmp->seek(0,0);
