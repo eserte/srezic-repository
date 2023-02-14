@@ -1,0 +1,157 @@
+=head1 get_accesslog_parser(...)
+
+=for category Webserver
+
+Create an accesslog parser, which takes a logline as a parameter (may
+alternatively be in C<$_> variable) and returns a hashref of the
+parsed fields.
+
+=cut
+
+{
+    # The following was created with the help of Regexp::Common,
+    # $RE{delimited}{-delim=>'"'}, but with only the payload "kept"
+    my $delim_rx = qr{(?:(?:\")([^\\\"]*(?:\\.[^\\\"]*)*)(?:\"))};
+
+    # XXX this should be configurable, e.g. in a yaml file. it would be
+    # nice if the user could drop in a apache logformat line and this
+    # would automatically turn into an regexp
+    my $parse_logline_rx = qr{^
+			      (?:([^:]+:\d+)\s+)? # only in other-vhosts
+			      (\S+(?:,\s\S+)*)    # ips
+			      \s+(\S+) # ?
+			      \s+(\S+) # ?
+			      \s+\[(\d+)/([^/]+)/(\d+):(\d+):(\d+):(\d+)\s+([+-]\d{4})\] # date time tzoffset
+			      \s+\"(\S+)\s+(\S+)\s+(\S+)\" # http method, url, protocol
+			      \s+(\d+) # status
+			      \s+(-|\d+) # content length
+			      \s+$delim_rx # referer
+			      \s+$delim_rx # ua
+			      (?:\s+(\d+(?:\.\d+)?(?:us)?))? # duration (maybe in microseconds or fractional seconds)
+			   }x;
+    my @logline_fields = qw(vhost0 ips XXX1 XXX2 date_d date_mon date_y time_h time_m time_s tzoffset method path proto status content_length referer ua duration);
+    my %valid_logline_fields = map {($_ => 1)} @logline_fields;
+
+    my %mon2m = qw(
+        Jan 1 Feb 2 Mar 3 Apr 4 May 5 Jun 6
+	Jul 7 Aug 8 Sep 9 Oct 10 Nov 11 Dec 12
+	Dez 12
+    );
+    # Yes, I added "Dez" here. May happen for logback-created access logs.
+    # More German (or other language) month names missing.
+    # And it has to be checked if "Mär" would be latin1 or utf8.
+    # See https://jira.qos.ch/browse/LOGBACK-302
+
+    my %computed_fields = (
+	date => sub {
+	    my $fields_ref = shift;
+	    my $m = $mon2m{$fields_ref->{date_mon}};
+	    $fields_ref->{date} = sprintf "%04d-%02d-%02d", $fields_ref->{date_y}, $m, $fields_ref->{date_d}
+	},
+	time => sub {
+	    my $fields_ref = shift;
+	    $fields_ref->{time} = sprintf "%02d:%02d:%02d", @{$fields_ref}{qw(time_h time_m time_s)};
+	},
+	epoch => sub {
+	    my $fields_ref = shift;
+	    my $m = $mon2m{$fields_ref->{date_mon}};
+	    $m--;
+	    $fields_ref->{epoch} = Time::Local::timelocal(@{$fields_ref}{qw(time_s time_m time_h date_d)}, $m, $fields_ref->{date_y});
+	}
+    );
+    my %computed_optional_fields = (
+	browser => sub {
+	    my $fields_ref = shift;
+	    $fields_ref->{_hbd} ||= HTTP::BrowserDetect->new($fields_ref->{ua});
+	    $fields_ref->{browser} = $fields_ref->{_hbd}->browser || '???';
+	},
+	browser_version => sub {
+	    my $fields_ref = shift;
+	    $fields_ref->{_hbd} ||= HTTP::BrowserDetect->new($fields_ref->{ua});
+	    $fields_ref->{browser_version} = $fields_ref->{_hbd}->browser_version || '???';
+	},
+	os => sub {
+	    my $fields_ref = shift;
+	    $fields_ref->{_hbd} ||= HTTP::BrowserDetect->new($fields_ref->{ua});
+	    $fields_ref->{os} = $fields_ref->{_hbd}->os || '???';
+	},
+	os_version => sub {
+	    my $fields_ref = shift;
+	    $fields_ref->{_hbd} ||= HTTP::BrowserDetect->new($fields_ref->{ua});
+	    $fields_ref->{os_version} = $fields_ref->{_hbd}->os_version || '???';
+	},
+    );
+    my %computed_fields_init = (
+	epoch           => sub { require Time::Local },
+	browser         => sub { require HTTP::BrowserDetect },
+	browser_version => sub { require HTTP::BrowserDetect },
+	os              => sub { require HTTP::BrowserDetect },
+	os_version      => sub { require HTTP::BrowserDetect },
+    );
+
+    sub get_accesslog_parser {
+	my(%opts) = @_;
+	my @output_fields = exists $opts{'fields'} ? @{ delete $opts{'fields'} } : ();
+	die "Unhandled options: " . join(" ", %opts) if %opts;
+
+	if (!@output_fields) {
+	    @output_fields = (@logline_fields, sort keys %computed_fields);
+	}
+
+	my @compute_callbacks;
+	my $do_add_logline_field;
+
+	for my $field (@output_fields) {
+	    if ($computed_fields_init{$field}) {
+		$computed_fields_init{$field}->();
+	    }
+	}
+
+	{
+	    my @invalid_fields;
+	    for (@output_fields) {
+		if ($computed_fields{$_}) {
+		    push @compute_callbacks, $computed_fields{$_};
+		} elsif ($computed_optional_fields{$_}) {
+		    push @compute_callbacks, $computed_optional_fields{$_};
+		} elsif ($_ eq 'logline') {
+		    $do_add_logline_field = 1;
+		} elsif (!$valid_logline_fields{$_}) {
+		    push @invalid_fields, $_;
+		}
+	    }
+	    if (@invalid_fields) {
+		die <<EOF;
+Invalid fields: @invalid_fields
+Valid fields are: @logline_fields @{[ keys %valid_logline_fields ]}
+EOF
+	    }
+	}
+
+	sub ($) {
+	    my $logline = $_[0];
+	    chomp $logline;
+	    if (my @fields = $logline =~ $parse_logline_rx) {
+		my %fields; @fields{@logline_fields} = @fields;
+		{
+		    no warnings 'uninitialized';
+		    if ($fields{duration} =~ m{^(\d+)us$}) {
+			$fields{duration} = $1/1_000_000;
+		    }
+		}
+		for (@compute_callbacks) { $_->(\%fields) }
+		if ($do_add_logline_field) {
+		    $fields{logline} = $logline;
+		}
+		return {
+		    map { ($_ => $fields{$_}) } @output_fields
+		};
+	    } else {
+		return {
+		    error => 'cannot parse logline',
+		    ($do_add_logline_field ? (logline => $logline) : ()),
+		};
+	    }
+	};
+    }
+}
