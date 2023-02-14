@@ -76,6 +76,16 @@ use Test::More 'no_plan';
 	    duration => "0.000583",
 	}, 'alternative duration parsing';
     }
+
+    {
+	my $p = get_accesslog_parser(fields => ['iso8601', 'epoch']);
+	(my $logline_with_another_tz = $logline) =~ s{\+0100}{+0000};
+	my $fields = $p->($logline_with_another_tz);
+	is_deeply $fields, {
+	    iso8601 => '2023-02-14T01:02:03+00:00',
+	    epoch => 1676336523,
+	}, 'alternative duration parsing';
+    }
 }
 
 ok !eval { get_accesslog_parser(invalid => "option") };
