@@ -79,7 +79,7 @@ jobs:
         set -e
         apt-get update -qq
         apt-get install -q --no-install-recommends -y build-essential libx11-dev libfreetype6-dev libxft-dev libpng-dev libz-dev libjpeg-dev
-        cpanm --quiet --notest Date::Manip IPC::Run Tk Text::Unidecode XML::LibXML XTerm::Conf DateTime::TimeZone Time::Moment Text::Diff || ( cat /github/home/.cpanm/work/*/build.log; false )
+        cpanm --quiet --notest Date::Manip IPC::Run Tk Text::Unidecode XML::LibXML XTerm::Conf DateTime::TimeZone DateTime::Format::ISO8601 Time::Moment Text::Diff || ( cat /github/home/.cpanm/work/*/build.log; false )
       if: "${{ matrix.with_all_pm_deps }}"
     - name: Install dependencies
       run: |

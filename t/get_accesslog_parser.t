@@ -13,11 +13,32 @@ BEGIN {
 # BEGIN DO
 do "$FindBin::RealBin/../perl/get_accesslog_parser";
 # END DO
+
+# testing helpers
+do "$FindBin::RealBin/../perl/module_exists";
+do "$FindBin::RealBin/../perl/module_path";
 }
 
 use Test::More;
 
-if (!eval { require Time::Moment } && !eval { require Time::Piece; Time::Piece->VERSION(1.16) } && !eval { require DateTime::Format::ISO8601 }) {
+if (   !module_exists('Time::Moment')
+    && !module_exists('DateTime::Format::ISO8601')
+    && !do {
+	my $mod_path = module_path('Time::Piece');
+	if ($mod_path && open my $fh, $mod_path) {
+	    my $Time_Piece_VERSION;
+	    while(<$fh>) {
+		if (/\$VERSION\s*=\s*'?([\d\.]+)/) {
+		    $Time_Piece_VERSION = $1;
+		    last;
+		}
+	    }
+	    $Time_Piece_VERSION >= 1.16;
+	} else {
+	    0;
+	}
+    }
+) {
     plan skip_all => 'No module available for date/time parsing';
 }
 plan 'no_plan';
@@ -89,14 +110,25 @@ plan 'no_plan';
 	is_deeply $fields, {
 	    iso8601 => '2023-02-14T01:02:03+00:00',
 	    epoch => 1676336523,
-	}, 'alternative duration parsing';
+	}, 'another time zone';
+    }
+
+    our @GET_PARSER_ACCESSLOG_PREFERRED_DATETIME_PARSERS;
+    my @test_datetime_parsers = @GET_PARSER_ACCESSLOG_PREFERRED_DATETIME_PARSERS; shift @test_datetime_parsers;
+    for my $preferred_parser (@test_datetime_parsers) {
+	local @GET_PARSER_ACCESSLOG_PREFERRED_DATETIME_PARSERS = ($preferred_parser, @GET_PARSER_ACCESSLOG_PREFERRED_DATETIME_PARSERS);
+	my $p = get_accesslog_parser(fields => ['epoch']);
+	my $fields = $p->($logline);
+	is_deeply $fields, {
+	    epoch => 1676332923,
+	}, "date/time parser on front of search list: $preferred_parser";
     }
 }
 
-ok !eval { get_accesslog_parser(invalid => "option") };
+ok !eval { get_accesslog_parser(invalid => "option") }, 'error with invalid option';
 like $@, qr{Unhandled options: invalid option};
 
-ok !eval { get_accesslog_parser(fields => ['invalid_field']) };
+ok !eval { get_accesslog_parser(fields => ['invalid_field']) }, 'error with invalid field';
 like $@, qr{Invalid fields: invalid_field};
 like $@, qr{Valid fields are: };
 
