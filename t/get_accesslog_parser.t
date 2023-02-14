@@ -15,7 +15,12 @@ do "$FindBin::RealBin/../perl/get_accesslog_parser";
 # END DO
 }
 
-use Test::More 'no_plan';
+use Test::More;
+
+if (!eval { require Time::Moment } && !eval { require Time::Piece; Time::Piece->VERSION(1.16) } && !eval { require DateTime::Format::ISO8601 }) {
+    plan skip_all => 'No module available for date/time parsing';
+}
+plan 'no_plan';
 
 {
     my $logline = qq{127.0.0.1 - - [14/Feb/2023:01:02:03 +0100] "GET /health HTTP/1.0" 200 2 "-" "-" 0.000583 pid=29053 reqno=852 mem=213.02 memdelta=0.00\n};

@@ -47,9 +47,12 @@ parsed fields.
 	epoch           => sub {
 	    if (eval { require Time::Moment; 1 }) {
 		$datetime_parser = 'TM';
-	    } else {
-		require Time::Piece;
+	    } elsif (eval { require Time::Piece; Time::Piece->VERSION(1.16); 1 }) { # %z handling not implemented for older Time::Piece
 		$datetime_parser = 'TP';
+	    } elsif (eval { require DateTime; require DateTime::Format::ISO8601; 1 }) {
+		$datetime_parser = 'DT';
+	    } else {
+		die "No suitable date/time parser found (tried: Time::Moment, Time::Piece >= 1.16, DateTime::Format::ISO8601)\n";
 	    }
 	},
 	browser         => sub { require HTTP::BrowserDetect },
@@ -93,9 +96,13 @@ parsed fields.
 	    my $iso8601 = $get_iso8601->($fields_ref);
 	    if ($datetime_parser eq 'TM') {
 		$fields_ref->{epoch} = Time::Moment->from_string($iso8601)->epoch;
-	    } else {
+	    } elsif ($datetime_parser eq 'TP') {
 		$iso8601 =~ s/:(?=\d{2}$)//; # Time::Piece can deal only with +0100, not +01:00
 		$fields_ref->{epoch} = Time::Piece->strptime($iso8601, "%Y-%m-%dT%H:%M:%S%z")->epoch;
+	    } elsif ($datetime_parser eq 'DT') {
+		$fields_ref->{epoch} = DateTime::Format::ISO8601->parse_datetime($iso8601)->epoch;
+	    } else {
+		die "Should not happen (\$datetime_parser=$datetime_parser)";
 	    }
 	}
     );
