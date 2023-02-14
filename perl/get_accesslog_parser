@@ -42,21 +42,60 @@ parsed fields.
     # And it has to be checked if "Mär" would be latin1 or utf8.
     # See https://jira.qos.ch/browse/LOGBACK-302
 
-    my %computed_fields = (
+    my $datetime_parser;
+    my %computed_fields_init = (
+	epoch           => sub {
+	    if (eval { require Time::Moment; 1 }) {
+		$datetime_parser = 'TM';
+	    } else {
+		require Time::Piece;
+		$datetime_parser = 'TP';
+	    }
+	},
+	browser         => sub { require HTTP::BrowserDetect },
+	browser_version => sub { require HTTP::BrowserDetect },
+	os              => sub { require HTTP::BrowserDetect },
+	os_version      => sub { require HTTP::BrowserDetect },
+    );
+
+    my $get_date = sub {
+	my $fields_ref = shift;
+	my $m = $mon2m{$fields_ref->{date_mon}};
+	sprintf "%04d-%02d-%02d", $fields_ref->{date_y}, $m, $fields_ref->{date_d}
+    };
+    my $get_time = sub {
+	my $fields_ref = shift;
+	sprintf "%02d:%02d:%02d", @{$fields_ref}{qw(time_h time_m time_s)};
+    };
+    my $get_iso8601 = sub {
+	my $fields_ref = shift;
+	(my $tz = $fields_ref->{tzoffset}) =~ s/(?<=\d{2})/:/;
+	$get_date->($fields_ref) . 'T' . $get_time->($fields_ref) . $tz;
+    };
+
+    my %computed_fields;
+    %computed_fields = (
 	date => sub {
-	    my $fields_ref = shift;
-	    my $m = $mon2m{$fields_ref->{date_mon}};
-	    $fields_ref->{date} = sprintf "%04d-%02d-%02d", $fields_ref->{date_y}, $m, $fields_ref->{date_d}
+	    $_[0]->{date} = $get_date->($_[0]);
 	},
 	time => sub {
-	    my $fields_ref = shift;
-	    $fields_ref->{time} = sprintf "%02d:%02d:%02d", @{$fields_ref}{qw(time_h time_m time_s)};
+	    $_[0]->{time} = $get_time->($_[0]);
+	},
+	iso8601 => sub {
+	    $_[0]->{iso8601} = $get_iso8601->($_[0]);
 	},
 	epoch => sub {
 	    my $fields_ref = shift;
-	    my $m = $mon2m{$fields_ref->{date_mon}};
-	    $m--;
-	    $fields_ref->{epoch} = Time::Local::timelocal(@{$fields_ref}{qw(time_s time_m time_h date_d)}, $m, $fields_ref->{date_y});
+	    ## works only if local time matches the accesslog timezone, thus disabled
+	    #my $m = $mon2m{$fields_ref->{date_mon}};
+	    #$m--;
+	    #$fields_ref->{epoch} = Time::Local::timelocal(@{$fields_ref}{qw(time_s time_m time_h date_d)}, $m, $fields_ref->{date_y});
+	    my $iso8601 = $get_iso8601->($fields_ref);
+	    if ($datetime_parser eq 'TM') {
+		$fields_ref->{epoch} = Time::Moment->from_string($iso8601)->epoch;
+	    } else {
+		$fields_ref->{epoch} = Time::Piece->strptime($iso8601, "%Y-%m-%dT%H:%M:%S.%3N%z")->epoch;
+	    }
 	}
     );
     my %computed_optional_fields = (
@@ -80,13 +119,6 @@ parsed fields.
 	    $fields_ref->{_hbd} ||= HTTP::BrowserDetect->new($fields_ref->{ua});
 	    $fields_ref->{os_version} = $fields_ref->{_hbd}->os_version || '???';
 	},
-    );
-    my %computed_fields_init = (
-	epoch           => sub { require Time::Local },
-	browser         => sub { require HTTP::BrowserDetect },
-	browser_version => sub { require HTTP::BrowserDetect },
-	os              => sub { require HTTP::BrowserDetect },
-	os_version      => sub { require HTTP::BrowserDetect },
     );
 
     sub get_accesslog_parser {

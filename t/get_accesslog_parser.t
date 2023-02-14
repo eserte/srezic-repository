@@ -34,6 +34,7 @@ use Test::More 'no_plan';
 	    "duration" => "0.000583",
 	    "epoch" => 1676332923,
 	    "ips" => "127.0.0.1",
+	    "iso8601" => '2023-02-14T01:02:03+01:00',
 	    "method" => "GET",
 	    "path" => "/health",
 	    "proto" => "HTTP/1.0",
