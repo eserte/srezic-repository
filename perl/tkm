@@ -1,0 +1,58 @@
+sub tkm (@) {
+    my %opt;
+    if (@_ && ref $_[0] eq 'HASH') {
+	%opt = %{ shift @_ };
+    }
+    my $block = delete $opt{block};
+    die "Unhandled options: " . join(" ", %opt) if %opt;
+
+    my @cmdline = @_;
+    if (!@cmdline) {
+	die "Missing cmdline";
+    }
+
+    my $t0 = time;
+    system @cmdline;
+    my $t1 = time;
+
+    my $color;
+    my $exitcode;
+    if ($? == -1) {
+	$exitcode = 'fatal error';
+	$color = 'red';
+    } elsif ($? != 0) {
+	$exitcode = $?>>8;
+	if ($exitcode == 0) {
+	    $exitcode = 'signalled';
+	}
+	$color = 'red';
+    } else {
+	$exitcode = 0;
+	$color = 'green4';
+    }
+    my $timeinfo = do {
+	require POSIX;
+	my $st = POSIX::strftime("%FT%T", localtime $t0);
+	my $et = POSIX::strftime("%FT%T", localtime $t1);
+	my $dur = $t1 - $t0;
+	"<$st - $et> ${dur}s";
+    };
+
+    my @tkm_cmd = (
+		   'tkmessage',
+		   '-bg', $color, '-fg', 'white', '-title', 'Last command',
+		   '-font', "Courier 14 bold",
+		   "@cmdline <$exitcode> $timeinfo"
+		  );
+    if ($block) {
+	system @tkm_cmd;
+	die "Can't exec '@tkm_cmd'" if $? != 0;
+    } else {
+	if (fork == 0) {
+	    exec @tkm_cmd;
+	    die "Can't exec '@tkm_cmd': $!";
+	}
+    }
+
+    return $exitcode eq '0';
+}
