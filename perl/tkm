@@ -3,7 +3,7 @@ sub tkm (@) {
     if (@_ && ref $_[0] eq 'HASH') {
 	%opt = %{ shift @_ };
     }
-    my $block = delete $opt{block};
+    my $fork = exists $opt{fork} ? delete $opt{fork} : 1;
     die "Unhandled options: " . join(" ", %opt) if %opt;
 
     my @cmdline = @_;
@@ -44,14 +44,14 @@ sub tkm (@) {
 		   '-font', "Courier 14 bold",
 		   "@cmdline <$exitcode> $timeinfo"
 		  );
-    if ($block) {
-	system @tkm_cmd;
-	die "Can't exec '@tkm_cmd'" if $? != 0;
-    } else {
+    if ($fork) {
 	if (fork == 0) {
 	    exec @tkm_cmd;
 	    die "Can't exec '@tkm_cmd': $!";
 	}
+    } else {
+	system @tkm_cmd;
+	die "Can't exec '@tkm_cmd'" if $? != 0;
     }
 
     return $exitcode eq '0';
