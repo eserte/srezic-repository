@@ -91,7 +91,7 @@ jobs:
       run: |
         set -e
         apt-get update -qq
-        apt-get install -q --no-install-recommends -y build-essential libx11-dev libfreetype6-dev libxft-dev libpng-dev libz-dev libjpeg-dev
+        apt-get install -q --no-install-recommends -y build-essential libx11-dev libfreetype6-dev libxft-dev libpng-dev libz-dev libjpeg-dev libxml2-dev
         if ! which cpm >/dev/null
         then
           # https://github.com/skaji/cpm?tab=readme-ov-file#1-self-contained-version
