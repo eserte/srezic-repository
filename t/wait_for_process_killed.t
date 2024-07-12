@@ -59,7 +59,7 @@ SKIP: {
     like $stderr, qr{\Q$pid};
     like $stderr, qr{\QProcess(es) do(es) not exist anymore};
     ok !kill 0 => $pid;
-    cmp_ok $t1-$t0, '>=', 3;
-    cmp_ok $t1-$t0, '<=', 4;
+    cmp_ok $t1-$t0, '>=', 3, "expected minimum runtime with $shell";
+    cmp_ok $t1-$t0, '<=', 4, "expected maximum runtime with $shell";
 }
 }
