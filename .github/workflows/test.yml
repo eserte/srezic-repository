@@ -98,6 +98,7 @@ jobs:
           curl -fsSL https://raw.githubusercontent.com/skaji/cpm/main/cpm > /usr/local/bin/cpm
           chmod +x /usr/local/bin/cpm
         fi
+        export MAKEFLAGS="-j4"
         if ! cpm install -g -v Date::Manip IPC::Run Tk Text::Unidecode XML::LibXML XTerm::Conf DateTime::TimeZone DateTime::Format::ISO8601 Time::Moment Text::Diff
         then
           cat ~/.perl-cpm/build.log
