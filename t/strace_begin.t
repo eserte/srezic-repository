@@ -41,9 +41,8 @@ require Time::HiRes;
 {
     my $tmp = File::Temp->new;
     my $res = strace {
-	for (1..2) {
-	    Time::HiRes::sleep(0.3);
-	}
+	_wait_for_strace_started("$tmp");
+	Time::HiRes::sleep(0.3);
 	"scalar result";
     } '-o', "$tmp", '-f';
     ok $res, 'scalar result';
@@ -59,9 +58,8 @@ require Time::HiRes;
     my $tmp = File::Temp->new;
     {
 	my $strace_keeper = strace_begin(qw(-tt -T -f --strace-cmd), ['strace'], '-o', "$tmp");
-	for (1..2) {
-	    Time::HiRes::sleep(0.3);
-	}
+	_wait_for_strace_started("$tmp");
+	Time::HiRes::sleep(0.3);
     }
     $tmp->seek(0,0);
     local $/ = undef;
@@ -69,6 +67,16 @@ require Time::HiRes;
     like $tmp_contents, qr{nanosleep}, 'found sleep() call in strace log';
     like $tmp_contents, qr{kill}, 'found self-kill in strace log';
     like $tmp_contents, qr{^$$\s+}, 'found my pid in strace log';
+}
+
+sub _wait_for_strace_started {
+    my($logfile) = @_;
+    # simple check to make sure strace started (-s will trigger a
+    # syscall, so $tmp is not empty anymore)
+    for (1..100) {
+	last if -s "$logfile";
+	Time::HiRes::sleep(0.05);
+    }
 }
 
 __END__

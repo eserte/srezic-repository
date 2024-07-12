@@ -21,6 +21,11 @@ option C<--strace-cmd>, which can be used for another command than
 C<strace>, but which behaves like C<strace> (i.e. takes the option
 C<-p I<pid>>).
 
+Note that starting C<strace> may take some time, so to be sure that
+all system calls are logged sleep a little bit, or, if a strace log
+file is written, then check for existence of the log file before
+continuing.
+
 =cut
 
 BEGIN {
